@@ -161,3 +161,5 @@ Jangan pernah menaruh secret payment gateway atau kredensial database di variabe
 - State di `localStorage` hanya berlaku pada browser/perangkat yang sama; belum ada akun atau sinkronisasi antarpengguna.
 - QRIS bukan QR pembayaran nyata dan tidak memanggil payment gateway.
 - Tombol simulasi berhasil hanya menguji tampilan alur frontend. Booking dan pembayaran produksi memerlukan backend, database, serta verifikasi gateway.
+
+https://media1.tenor.com/m/XftGx4TfEIgAAAAC/actually-genius-youtube-thumbnail.gif
