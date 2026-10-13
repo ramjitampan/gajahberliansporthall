@@ -1,165 +1,305 @@
-# BadminLap.id — Dokumentasi Project
+<div align="center">
 
-Frontend booking lapangan badminton untuk BadminLap.id, dibuat dengan React, Vite, JavaScript, dan Tailwind CSS.
+# 🏸 BadminLap.id
 
-## Ringkasan
+### Court Booking, Made Simple.
 
-BadminLap.id membantu pengguna melihat informasi harga dan memilih jadwal lapangan badminton. Repository ini berisi **frontend saja**; belum tersedia server Express, database, ataupun integrasi payment gateway. Booking dan pembayaran saat ini berjalan dalam mode mock.
+**Frontend pemesanan lapangan badminton dengan pengalaman booking yang sederhana, responsif, dan terstruktur.**
 
-## Stack dan struktur
+![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square&logo=vite&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=javascript&logoColor=000)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
+![Status](https://img.shields.io/badge/Status-Frontend_Demo-orange?style=flat-square)
 
-- React + Vite, JavaScript (JSX); bukan TypeScript.
-- Tailwind CSS untuk styling.
-- React Router untuk navigasi halaman.
-- Framer Motion untuk transisi dan reveal ringan.
-- Lucide React untuk ikon.
+**[Overview](#-overview) · [Tech Stack](#-tech-stack) · [Booking Flow](#-booking-flow) · [Backend Integration](#-backend-integration-guide) · [Getting Started](#-getting-started)**
+
+</div>
+
+---
+
+> [!IMPORTANT]
+> **Status proyek: Frontend demo / mock.** Repository ini belum menyediakan Express API, database, sinkronisasi jadwal real-time, atau payment gateway. Seluruh booking dan pembayaran masih disimulasikan di browser. Dokumentasi endpoint di bawah adalah **usulan kontrak**, bukan API yang telah tersedia.
+
+## ✦ Overview
+
+**BadminLap.id** membantu pengguna menjelajahi fasilitas, memeriksa rincian harga, memilih jadwal lapangan, hingga melihat bukti pemesanan dalam satu alur yang konsisten.
+
+Saat ini frontend sudah mencakup:
+
+- Informasi venue, fasilitas, dan daftar harga.
+- Pemilihan tanggal, lapangan, jam mulai, dan durasi sewa.
+- Validasi ketersediaan berdasarkan **data mock**.
+- Form data pemesan dan kalkulasi total biaya.
+- Simulasi QRIS, status pembayaran, dan bukti booking yang dapat dicetak.
+- Penyimpanan sementara state booking melalui `localStorage` pada perangkat yang sama.
+
+## 🧩 Tech Stack
+
+| Kategori | Teknologi | Kegunaan |
+| :-- | :-- | :-- |
+| UI | React + JSX | Komponen dan antarmuka pengguna |
+| Build Tool | Vite | Development server dan production build |
+| Bahasa | JavaScript | Logika frontend, **bukan TypeScript** |
+| Styling | Tailwind CSS | Styling dan layout responsif |
+| Routing | React Router | Navigasi antarhalaman |
+| Animasi | Framer Motion | Transisi dan reveal ringan |
+| Ikon | Lucide React | Ikon antarmuka |
+| State | React Context + `localStorage` | State booking dan persistensi lokal |
+
+### Project Structure
 
 ```text
 src/
-├── components/       # Navbar, footer, UI reusable, section Beranda
-├── data/             # Data mock lapangan, fasilitas, harga, dan jadwal
-├── hooks/             # State booking React Context
-├── layouts/           # Layout bersama halaman
-├── pages/             # Beranda, booking, pricelist, fasilitas, checkout
-├── services/          # Mock ketersediaan dan pembayaran
-└── utils/             # Format mata uang dan kalkulasi booking
+├── components/       # Navbar, footer, elemen UI reusable, section Beranda
+├── data/             # Mock data lapangan, fasilitas, harga, dan jadwal
+├── hooks/            # State booking berbasis React Context
+├── layouts/          # Layout bersama antarhalaman
+├── pages/            # Beranda, booking, harga, fasilitas, checkout
+├── services/         # Mock ketersediaan dan pembayaran
+└── utils/            # Formatter mata uang dan kalkulasi booking
 ```
 
-### Halaman
+### Routes
 
-| Route | Kegunaan |
-| --- | --- |
-| `/` | Beranda: pengenalan, solusi, keunggulan, fasilitas, alur booking |
+| Route | Deskripsi |
+| :-- | :-- |
+| `/` | Beranda, keunggulan, fasilitas, dan alur booking |
 | `/booking` | Pilih tanggal, lapangan, jam mulai, dan durasi |
-| `/booking/data-pemesan` | Data pemesan dan ringkasan jadwal |
-| `/booking/pembayaran` | Pembayaran QRIS demo dan simulasi status |
-| `/booking/konfirmasi` | Bukti booking demo yang bisa dicetak |
-| `/daftar-harga` | Rincian sewa, biaya layanan, dan estimasi total |
+| `/booking/data-pemesan` | Isi identitas pemesan dan cek ringkasan |
+| `/booking/pembayaran` | QRIS demo dan simulasi status pembayaran |
+| `/booking/konfirmasi` | Bukti booking demo yang dapat dicetak |
+| `/daftar-harga` | Rincian tarif, biaya layanan, dan estimasi total |
 | `/tentang` | Cerita dan prinsip BadminLap.id |
-| `/fasilitas` | Galeri fasilitas dengan konten visual placeholder |
+| `/fasilitas` | Galeri fasilitas dengan placeholder visual |
 
-## Arah visual
+## 🎨 Design Direction
 
-Identitasnya mengambil suasana lapangan indoor yang tenang, dewasa, dan premium—bukan dashboard atau template SaaS. Beranda menggunakan deep forest green dan emerald gelap sebagai bidang utama; section sage, charcoal, dan cream memberi jeda agar halaman tidak terasa datar. Foto lapangan diberi crop serta overlay gelap supaya menyatu dengan bidang warna dan teks tetap terbaca.
+Pendekatan visual BadminLap.id terinspirasi dari suasana lapangan badminton indoor: **tenang, dewasa, dan premium**. Desainnya lebih dekat ke identitas venue olahraga dibanding template dashboard SaaS.
 
-| Peran | Warna |
-| --- | --- |
-| Deep forest / hero | `#102A22` |
-| Emerald gelap | `#142E26`, `#182F27`, `#253C32` |
-| Sage | `#A9BDA5` |
-| Cream hangat | `#F7F3EA` |
-| Ivory | `#FFFDF8` |
-| Champagne | `#C8AE78` |
-| Taupe / garis | `#D8D0C0` |
+| Token | Hex | Penggunaan |
+| :-- | :-- | :-- |
+| Deep Forest | `#102A22` | Hero dan latar utama |
+| Dark Emerald | `#142E26` · `#182F27` · `#253C32` | Bidang dan kedalaman visual |
+| Sage | `#A9BDA5` | Aksen lembut |
+| Warm Cream | `#F7F3EA` | Section terang |
+| Ivory | `#FFFDF8` | Permukaan dan kontras |
+| Champagne | `#C8AE78` | Aksen premium |
+| Taupe | `#D8D0C0` | Garis dan pemisah |
 
-Tipografi memakai DM Sans untuk body dan DM Serif Display untuk aksen editorial. Efek kaca dipakai terbatas pada panel sorotan: permukaan transparan, blur, garis tipis, dan bayangan lembut di atas latar gelap. Fokus keyboard terlihat jelas; animasi menghormati preferensi reduced motion.
+**Typography:** DM Sans untuk body, DM Serif Display untuk sentuhan editorial.
 
-## Pengalaman pengguna dan alur booking
+Gambar lapangan menggunakan crop dan overlay gelap untuk menjaga keterbacaan. Efek glassmorphism hanya digunakan pada panel tertentu. Fokus keyboard dibuat terlihat dan animasi mengikuti preferensi **reduced motion**.
 
-1. Pengguna mengenali layanan dari Beranda dan dapat membuka Pricelist sebelum booking.
-2. Di `/booking`, pengguna memilih tanggal yang tidak lampau, salah satu dari tiga lapangan mock, jam mulai, dan durasi 1–4 jam.
-3. Slot mock yang sudah dipesan dinonaktifkan. Ketersediaan diperiksa pada setiap jam dalam seluruh durasi dan tidak boleh melewati jam tutup (22.00).
-4. Ringkasan menampilkan lapangan, tanggal, waktu, durasi, biaya sewa, biaya layanan, dan total.
-5. Data pemesan divalidasi di browser. State booking disimpan pada `localStorage` agar tetap tersedia ketika berpindah halaman atau kembali.
-6. Kode booking dibuat di frontend; halaman QRIS dan tombol cek/gagal/berhasil/kedaluwarsa hanya simulasi. Konfirmasi berhasil bukan verifikasi pembayaran nyata.
-
-Harga mock:
+## 🔄 Booking Flow
 
 ```text
-Sewa lapangan = Rp40.000 × durasi (jam)
-Biaya layanan = Rp2.000 per booking, satu kali
-Total          = sewa lapangan + biaya layanan
-
-1 jam = Rp42.000
-2 jam = Rp82.000
-3 jam = Rp122.000
+Beranda / Daftar Harga
+         │
+         ▼
+Pilih Tanggal + Lapangan
+         │
+         ▼
+Pilih Jam Mulai + Durasi
+         │
+         ▼
+Validasi Slot (Mock)
+         │
+         ▼
+Data Pemesan + Ringkasan
+         │
+         ▼
+QRIS Demo + Simulasi Status
+         │
+         ▼
+Konfirmasi / Bukti Booking Demo
 ```
 
-Mock jadwal ada di `src/data/schedules.js`; harga di `src/data/prices.js`; aturan ketersediaan di `src/services/mockBookingService.js`. Perbarui sumber-sumber tersebut saat mengganti data demo, atau ganti mock service dengan API setelah backend tersedia.
+### Current Business Rules
 
-## Menjalankan frontend
+1. Tanggal booking tidak boleh berada di masa lalu.
+2. Terdapat **3 lapangan mock** yang dapat dipilih.
+3. Durasi pemesanan adalah **1–4 jam**.
+4. Ketersediaan dicek pada **setiap jam** dalam rentang durasi; slot mock yang terisi tidak dapat dipilih.
+5. Pemesanan tidak boleh melewati jam tutup **22.00**.
+6. Data pemesan divalidasi di browser, sementara state disimpan di `localStorage`.
+7. Kode booking dibuat di frontend. **Status pembayaran sukses bukan bukti pembayaran nyata.**
+
+### Pricing (Mock)
+
+| Komponen | Nominal |
+| :-- | --: |
+| Tarif sewa | Rp40.000 / jam |
+| Biaya layanan | Rp2.000 / booking |
+| Total 1 jam | **Rp42.000** |
+| Total 2 jam | **Rp82.000** |
+| Total 3 jam | **Rp122.000** |
+| Total 4 jam | **Rp162.000** |
+
+**Formula:** `total = (40_000 × durasiJam) + 2_000`
+
+> [!NOTE]
+> Sumber data demo: `src/data/schedules.js` (jadwal), `src/data/prices.js` (harga), dan `src/services/mockBookingService.js` (aturan ketersediaan). Saat backend siap, ganti akses mock melalui service API, bukan langsung dari komponen UI.
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js dan npm yang kompatibel dengan versi Vite pada proyek.
+- Git (opsional, untuk cloning repository).
+
+### Local Development
 
 ```bash
 npm install
 npm run dev
+```
+
+Frontend secara default dapat diakses melalui **http://localhost:5173** (jika port tersedia).
+
+### Production Build
+
+```bash
 npm run build
 ```
 
-Vite default berjalan di `http://localhost:5173`. Untuk mengakses dari perangkat lain atau membagikan preview frontend:
+### Network / Temporary Preview (Opsional)
 
 ```bash
 npm run dev -- --host 0.0.0.0 --port 5173
 npx localtunnel --port 5173
 ```
 
-Gunakan URL HTTPS yang dicetak LocalTunnel. URL frontend tunnel adalah **origin browser**; URL itu yang perlu diizinkan backend melalui CORS. Jika browser pengguna harus mengakses backend lokal, backend juga perlu URL yang bisa dijangkau publik; `localhost` di browser pengguna menunjuk ke perangkat pengguna, bukan komputer developer.
+Gunakan URL HTTPS yang diberikan LocalTunnel. Preview publik ini bersifat sementara dan tidak disarankan sebagai deployment produksi.
 
-## Panduan integrasi backend
+> **CORS reminder:** URL tunnel frontend merupakan **browser origin**. Backend perlu mengizinkan origin tersebut. Apabila frontend diakses dari perangkat lain, `localhost` sebagai API URL akan menunjuk ke perangkat pengunjung, **bukan** mesin developer. Backend harus dapat diakses melalui alamat jaringan atau domain yang sesuai.
 
-Langkah berikut adalah **rekomendasi integrasi**, bukan API yang sudah tersedia di repository ini.
+---
 
-### 1. Tetapkan tanggung jawab backend
+## 🔌 Backend Integration Guide
 
-Backend harus menjadi sumber kebenaran untuk jadwal, harga, pembuatan booking, penguncian slot, dan status pembayaran. Jangan mempercayai total harga, ketersediaan slot, `paid: true`, atau hasil pembayaran yang hanya dikirim dari frontend.
+Bagian ini merupakan **panduan handoff bagi backend developer**. Seluruh endpoint di sini adalah rekomendasi awal dan perlu disepakati sebelum implementasi.
 
-### 2. Siapkan endpoint yang dibutuhkan frontend
+### 1. Backend Responsibilities
 
-Kontrak awal yang bisa disepakati tim frontend/backend:
+Backend harus menjadi **single source of truth** untuk:
 
-| Method dan path (usulan) | Fungsi |
-| --- | --- |
-| `GET /api/courts` | Daftar lapangan aktif |
-| `GET /api/availability?courtId=...&date=YYYY-MM-DD&duration=...` | Slot tersedia untuk seluruh durasi |
-| `POST /api/bookings` | Validasi jadwal dan buat booking sementara secara atomik |
-| `GET /api/bookings/:bookingCode` | Ambil ringkasan dan status booking |
-| `POST /api/bookings/:bookingCode/payment` | Buat instruksi/QRIS melalui payment gateway |
-| `GET /api/payments/:paymentId/status` | Ambil status pembayaran dari backend |
-| `POST /api/payments/webhook` | Terima notifikasi gateway-ke-backend dan konfirmasi booking |
+- Data lapangan aktif dan aturan operasional.
+- Jadwal, ketersediaan, dan konflik pemesanan.
+- Harga, biaya tambahan, serta nominal final.
+- Pembuatan booking sementara dan masa kedaluwarsanya.
+- Pembuatan instruksi pembayaran serta verifikasi status melalui payment gateway.
 
-Backend menghitung ulang `Rp40.000 × durasi + Rp2.000`, memvalidasi batas jam serta konflik jadwal di transaksi database, dan menetapkan kedaluwarsa booking sementara. Simpan idempotency key untuk mencegah booking/pembayaran ganda.
+**Jangan percaya** nominal yang dikirim frontend, klaim slot tersedia, `paid: true`, atau status pembayaran dari tombol simulasi. Server wajib menghitung dan memvalidasi ulang.
 
-### 3. Konfigurasikan CORS
+### 2. Proposed API Contract
 
-Di backend Express, parse daftar origin dari environment variable, pisahkan dengan koma, dan trim whitespace. Jangan gunakan `origin: "*"` bersama credentials. Jika autentikasi memakai cookie, pertahankan `credentials: true` di server dan gunakan `credentials: "include"` pada request frontend; atur cookie `SameSite`/`Secure` sesuai HTTPS.
+Base path usulan: `/api`
 
-Contoh value pada environment backend (ganti dengan origin frontend yang benar-benar aktif):
+| Method | Endpoint | Tujuan |
+| :-- | :-- | :-- |
+| `GET` | `/api/courts` | Mengambil daftar lapangan aktif |
+| `GET` | `/api/availability?courtId=...&date=YYYY-MM-DD&duration=...` | Mengambil slot tersedia sesuai durasi |
+| `POST` | `/api/bookings` | Validasi akhir dan membuat booking sementara secara atomik |
+| `GET` | `/api/bookings/:bookingCode` | Ringkasan dan status booking |
+| `POST` | `/api/bookings/:bookingCode/payment` | Membuat instruksi pembayaran / QRIS dari gateway |
+| `GET` | `/api/payments/:paymentId/status` | Membaca status pembayaran dari backend |
+| `POST` | `/api/payments/webhook` | Memproses notifikasi gateway secara aman |
 
-```env
-CORS_ORIGIN=http://localhost:5173,https://<subdomain-frontend-aktif>.loca.lt
+**Kontrak yang perlu disepakati:** struktur request/response JSON, field wajib, error code, format tanggal dan zona waktu (misalnya `Asia/Jakarta` jika sesuai lokasi venue), status booking/pembayaran, serta aturan expiry. Endpoint webhook adalah **server-to-server**, bukan dipanggil oleh frontend.
+
+### 3. Booking & Payment Integrity
+
+Backend perlu menerapkan ketentuan berikut:
+
+1. Validasi ulang lapangan, tanggal, waktu, durasi, dan jam tutup.
+2. Hitung kembali nominal di server: `Rp40.000 × durasiJam + Rp2.000` (saat tarif demo masih digunakan).
+3. Cegah **double booking** menggunakan transaksi database dan mekanisme penguncian/constraint yang sesuai.
+4. Terapkan expiry untuk booking sementara agar slot tidak tertahan selamanya.
+5. Gunakan **idempotency key** atau proteksi serupa untuk mencegah request booking/pembayaran ganda.
+6. Verifikasi keaslian webhook gateway, nominal, identitas transaksi, dan status sebelum mengonfirmasi pembayaran.
+7. Pastikan pemrosesan webhook idempotent, termasuk ketika event dikirim berulang.
+
+### 4. Environment & CORS
+
+Contoh **environment backend Express**:
+
+```dotenv
+# Daftar origin frontend yang diizinkan (dipisahkan koma)
+CORS_ORIGIN=http://localhost:5173,https://subdomain-frontend-aktif.loca.lt
 ```
 
-Untuk Railway, set `CORS_ORIGIN` pada **Variables service backend**, bukan di repository frontend. Tambahkan origin deployment frontend permanen bila sudah ada. LocalTunnel bisa memberi URL berbeda setiap sesi; perbarui daftar saat URL berubah.
+Saat menerapkan CORS:
 
-### 4. Atur base URL API di frontend
+- Parse `CORS_ORIGIN` menjadi array, `trim()` tiap entri, dan abaikan entri kosong.
+- Hindari `Access-Control-Allow-Origin: *` ketika menggunakan credentials.
+- Jika memakai cookie auth, sesuaikan `credentials: true` di server, `credentials: 'include'` pada client, dan konfigurasi `SameSite`/`Secure` sesuai skema HTTPS.
+- Di Railway, set `CORS_ORIGIN` pada **Variables service backend**, bukan pada frontend.
+- URL LocalTunnel dapat berubah tiap sesi. Perbarui daftar origin bila alamat berubah.
 
-Setelah endpoint backend siap, tambahkan file `.env.local` (file `.env*` di-ignore oleh Git) sesuai lingkungan:
+### 5. Frontend API Base URL
 
-```env
-# Backend berjalan di komputer yang sama
-VITE_API_URL=http://localhost:<port-backend>
+Setelah API tersedia, buat `.env.local` untuk konfigurasi frontend:
 
-# Atau backend Railway / tunnel backend yang bisa dijangkau browser
-VITE_API_URL=https://<domain-backend-aktif>
+```dotenv
+# Pilih SATU sesuai environment aktif:
+VITE_API_URL=http://localhost:3000
+# VITE_API_URL=https://domain-backend-aktif.example.com
 ```
 
-Panggil `import.meta.env.VITE_API_URL` dari service API frontend, bukan dari komponen UI. Jika halaman frontend dibuka melalui tunnel, **jangan** gunakan `localhost` sebagai URL backend kecuali backend berjalan di perangkat pengunjung sendiri. Gunakan domain Railway atau URL tunnel backend.
+Port `3000` hanya **contoh**, bukan port backend yang telah dipastikan tersedia.
 
-### 5. Ganti mock secara bertahap
+Baca variabel melalui service terpusat:
 
-1. Sepakati schema request/response, format tanggal/waktu, zona waktu, dan enum status dengan tim backend.
-2. Buat satu API client yang membaca `VITE_API_URL`, menangani error/loading, dan mengirim credentials hanya bila autentikasi cookie memang dipakai.
-3. Ganti `mockBookingService` dengan pemeriksaan availability API; server tetap melakukan validasi final saat membuat booking.
-4. Ganti pembuatan kode booking lokal dengan response `POST /api/bookings`; simpan hanya identifier dan data tampilan yang diperlukan di browser.
-5. Ganti simulasi QRIS dengan instruksi dari backend. Frontend hanya menampilkan status hasil polling; webhook payment gateway memverifikasi pembayaran di backend.
-6. Uji konflik dua pemesan di slot sama, pembayaran gagal/kedaluwarsa, percobaan ulang, refresh halaman, dan validasi nominal.
+```js
+const apiBaseUrl = import.meta.env.VITE_API_URL;
+```
 
-Jangan pernah menaruh secret payment gateway atau kredensial database di variabel `VITE_*`; nilai tersebut masuk ke bundle browser. Simpan secret hanya pada environment backend.
+Jangan menyebarkan request API langsung ke banyak komponen. Pastikan file environment lokal tidak ikut di-commit, dan konfigurasi host selalu sesuai lingkungan pengguna.
 
-## Batasan mode demo
+> [!CAUTION]
+> **Jangan simpan secret** payment gateway, database URL, private key, atau token rahasia di variabel `VITE_*`. Semua variabel `VITE_*` yang digunakan oleh Vite berpotensi masuk ke bundle browser. Secret harus tinggal di environment backend.
 
-- Lapangan, jadwal, dan harga adalah data frontend mock, bukan ketersediaan venue live.
-- State di `localStorage` hanya berlaku pada browser/perangkat yang sama; belum ada akun atau sinkronisasi antarpengguna.
-- QRIS bukan QR pembayaran nyata dan tidak memanggil payment gateway.
-- Tombol simulasi berhasil hanya menguji tampilan alur frontend. Booking dan pembayaran produksi memerlukan backend, database, serta verifikasi gateway.
+### 6. Migration Plan: Mock → Real API
 
+- [ ] Sepakati schema API, format waktu, timezone, dan enum status.
+- [ ] Buat API client terpusat dengan penanganan loading, error, dan timeout.
+- [ ] Ganti availability mock dengan `GET /api/availability`.
+- [ ] Hubungkan checkout ke `POST /api/bookings`; gunakan kode booking dari server.
+- [ ] Ganti QRIS demo dengan instruksi gateway dari backend.
+- [ ] Terapkan polling status pembayaran melalui backend; gunakan webhook untuk konfirmasi sebenarnya.
+- [ ] Sinkronkan data setelah refresh tanpa mengandalkan `localStorage` sebagai sumber kebenaran.
+- [ ] Uji skenario konflik, pembayaran gagal, expiry, retry, dan nominal yang dimodifikasi dari browser.
+
+### 7. Suggested QA Scenarios
+
+| Skenario | Hasil yang diharapkan |
+| :-- | :-- |
+| Dua user memilih slot sama | Hanya satu booking yang berhasil mengunci slot |
+| Durasi melewati jam 22.00 | Ditolak oleh backend |
+| Total harga diedit lewat DevTools | Server tetap menghitung nominal yang benar |
+| Pengguna refresh saat pembayaran | Status dapat dipulihkan dari server |
+| Webhook dikirim lebih dari sekali | Pembayaran tidak diproses ganda |
+| Booking belum dibayar hingga expiry | Slot dilepas sesuai kebijakan |
+| Pembayaran gagal / dibatalkan | Status booking dan pembayaran tetap konsisten |
+
+## ⚠️ Demo Limitations
+
+| Area | Kondisi saat ini |
+| :-- | :-- |
+| Lapangan & jadwal | Data mock, bukan inventaris live |
+| Harga | Konstanta frontend untuk keperluan demo |
+| Penyimpanan booking | `localStorage`, hanya pada browser/perangkat yang sama |
+| Autentikasi & database | Belum terintegrasi |
+| QRIS | Visual simulasi, tidak dapat digunakan untuk pembayaran nyata |
+| Konfirmasi pembayaran | Perubahan status simulasi, bukan hasil verifikasi gateway |
+| Multi-user concurrency | Belum aman tanpa backend dan transaksi database |
+
+---
+
+<div align="center">
+
+### for nobel
 ![Actually Genius](https://media1.tenor.com/m/XftGx4TfEIgAAAAC/actually-genius-youtube-thumbnail.gif)
+
+</div>
