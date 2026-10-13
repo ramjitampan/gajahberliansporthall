@@ -162,4 +162,5 @@ Jangan pernah menaruh secret payment gateway atau kredensial database di variabe
 - QRIS bukan QR pembayaran nyata dan tidak memanggil payment gateway.
 - Tombol simulasi berhasil hanya menguji tampilan alur frontend. Booking dan pembayaran produksi memerlukan backend, database, serta verifikasi gateway.
 
-https://media1.tenor.com/m/XftGx4TfEIgAAAAC/actually-genius-youtube-thumbnail.gif
+[https://media1.tenor.com/m/XftGx4TfEIgAAAAC/actually-genius-youtube-thumbnail.gif
+](https://tenor.com/ieqnFHMUOp2.gif)
