@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🏸 gajahberliansporthall
+# 🏸 GajahBerlianSportsHall
 
 ### Court Booking, Made Simple.
 
@@ -23,7 +23,7 @@
 
 ## ✦ Overview
 
-**BadminLap.id** membantu pengguna menjelajahi fasilitas, memeriksa rincian harga, memilih jadwal lapangan, hingga melihat bukti pemesanan dalam satu alur yang konsisten.
+**GajahBerlianSportsHall** membantu pengguna menjelajahi fasilitas, memeriksa rincian harga, memilih jadwal lapangan, hingga melihat bukti pemesanan dalam satu alur yang konsisten.
 
 Saat ini frontend sudah mencakup:
 
@@ -32,7 +32,8 @@ Saat ini frontend sudah mencakup:
 - Validasi ketersediaan berdasarkan **data mock**.
 - Form data pemesan dan kalkulasi total biaya.
 - Simulasi QRIS, status pembayaran, dan bukti booking yang dapat dicetak.
-- Penyimpanan sementara state booking melalui `localStorage` pada perangkat yang sama.
+- Riwayat booking berhasil dan struk yang dapat dibuka kembali dari perangkat yang sama.
+- Penyimpanan state booking dan riwayat melalui `localStorage` pada perangkat yang sama.
 
 ## 🧩 Tech Stack
 
@@ -45,7 +46,7 @@ Saat ini frontend sudah mencakup:
 | Routing | React Router | Navigasi antarhalaman |
 | Animasi | Framer Motion | Transisi dan reveal ringan |
 | Ikon | Lucide React | Ikon antarmuka |
-| State | React Context + `localStorage` | State booking dan persistensi lokal |
+| State | React Context + `localStorage` | Draft booking dan riwayat/struk lokal pada perangkat yang sama |
 
 ### Project Structure
 
@@ -69,13 +70,15 @@ src/
 | `/booking/data-pemesan` | Isi identitas pemesan dan cek ringkasan |
 | `/booking/pembayaran` | QRIS demo dan simulasi status pembayaran |
 | `/booking/konfirmasi` | Bukti booking demo yang dapat dicetak |
+| `/booking/riwayat` | Daftar booking berhasil dan tautan untuk membuka struk |
+| `/booking/riwayat/:code` | Struk booking tertentu yang dapat dicetak |
 | `/daftar-harga` | Rincian tarif, biaya layanan, dan estimasi total |
-| `/tentang` | Cerita dan prinsip BadminLap.id |
-| `/fasilitas` | Galeri fasilitas dengan placeholder visual |
+| `/tentang` | Cerita dan prinsip GajahBerlianSportsHall |
+| `/fasilitas` | Galeri venue, aturan, dan fasilitas pendukung |
 
 ## 🎨 Design Direction
 
-Pendekatan visual BadminLap.id terinspirasi dari suasana lapangan badminton indoor: **tenang, dewasa, dan premium**. Desainnya lebih dekat ke identitas venue olahraga dibanding template dashboard SaaS.
+Pendekatan visual GajahBerlianSportsHall terinspirasi dari suasana lapangan badminton indoor: **tenang, dewasa, dan premium**. Desainnya lebih dekat ke identitas venue olahraga dibanding template dashboard SaaS.
 
 | Token | Hex | Penggunaan |
 | :-- | :-- | :-- |
@@ -118,12 +121,13 @@ Konfirmasi / Bukti Booking Demo
 ### Current Business Rules
 
 1. Tanggal booking tidak boleh berada di masa lalu.
-2. Terdapat **3 lapangan mock** yang dapat dipilih.
+2. Terdapat **2 lapangan mock** yang dapat dipilih.
 3. Durasi pemesanan adalah **1–4 jam**.
 4. Ketersediaan dicek pada **setiap jam** dalam rentang durasi; slot mock yang terisi tidak dapat dipilih.
 5. Pemesanan tidak boleh melewati jam tutup **22.00**.
-6. Data pemesan divalidasi di browser, sementara state disimpan di `localStorage`.
-7. Kode booking dibuat di frontend. **Status pembayaran sukses bukan bukti pembayaran nyata.**
+6. Data pemesan divalidasi di browser; state draft disimpan di `localStorage`.
+7. Booking yang pembayarannya berhasil dicatat di riwayat lokal dan struk dapat dibuka kembali lewat kode booking. Data ini hanya tersedia di browser/perangkat yang sama sampai backend terintegrasi.
+8. Kode booking dibuat di frontend. **Status pembayaran sukses bukan bukti pembayaran nyata.**
 
 ### Pricing (Mock)
 
@@ -202,11 +206,12 @@ Base path usulan: `/api`
 | `GET` | `/api/availability?courtId=...&date=YYYY-MM-DD&duration=...` | Mengambil slot tersedia sesuai durasi |
 | `POST` | `/api/bookings` | Validasi akhir dan membuat booking sementara secara atomik |
 | `GET` | `/api/bookings/:bookingCode` | Ringkasan dan status booking |
+| `GET` | `/api/me/bookings` | Riwayat booking milik customer yang sedang terautentikasi |
 | `POST` | `/api/bookings/:bookingCode/payment` | Membuat instruksi pembayaran / QRIS dari gateway |
 | `GET` | `/api/payments/:paymentId/status` | Membaca status pembayaran dari backend |
 | `POST` | `/api/payments/webhook` | Memproses notifikasi gateway secara aman |
 
-**Kontrak yang perlu disepakati:** struktur request/response JSON, field wajib, error code, format tanggal dan zona waktu (misalnya `Asia/Jakarta` jika sesuai lokasi venue), status booking/pembayaran, serta aturan expiry. Endpoint webhook adalah **server-to-server**, bukan dipanggil oleh frontend.
+**Kontrak yang perlu disepakati:** struktur request/response JSON, field wajib, error code, format tanggal dan zona waktu (misalnya `Asia/Jakarta` jika sesuai lokasi venue), status booking/pembayaran, serta aturan expiry. Endpoint riwayat harus mengembalikan booking milik customer dari sesi autentikasi—jangan mempercayai `customerId` bebas dari browser. Endpoint webhook adalah **server-to-server**, bukan dipanggil oleh frontend.
 
 ### 3. Booking & Payment Integrity
 
@@ -268,6 +273,7 @@ Jangan menyebarkan request API langsung ke banyak komponen. Pastikan file enviro
 - [ ] Hubungkan checkout ke `POST /api/bookings`; gunakan kode booking dari server.
 - [ ] Ganti QRIS demo dengan instruksi gateway dari backend.
 - [ ] Terapkan polling status pembayaran melalui backend; gunakan webhook untuk konfirmasi sebenarnya.
+- [ ] Pindahkan riwayat booking dari `localStorage` ke endpoint customer terautentikasi dan gunakan data server untuk membuat struk lintas perangkat.
 - [ ] Sinkronkan data setelah refresh tanpa mengandalkan `localStorage` sebagai sumber kebenaran.
 - [ ] Uji skenario konflik, pembayaran gagal, expiry, retry, dan nominal yang dimodifikasi dari browser.
 
@@ -289,7 +295,7 @@ Jangan menyebarkan request API langsung ke banyak komponen. Pastikan file enviro
 | :-- | :-- |
 | Lapangan & jadwal | Data mock, bukan inventaris live |
 | Harga | Konstanta frontend untuk keperluan demo |
-| Penyimpanan booking | `localStorage`, hanya pada browser/perangkat yang sama |
+| Penyimpanan booking & riwayat | `localStorage`, hanya pada browser/perangkat yang sama; belum sinkron antarperangkat |
 | Autentikasi & database | Belum terintegrasi |
 | QRIS | Visual simulasi, tidak dapat digunakan untuk pembayaran nyata |
 | Konfirmasi pembayaran | Perubahan status simulasi, bukan hasil verifikasi gateway |

@@ -1,36 +1,513 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { ArrowUpRight, CircleDot, Dumbbell, LampDesk, ParkingCircle } from 'lucide-react'
-import { Link } from 'react-router-dom'
-import { facilities } from '../data/facilities'
-import heroImage from '../assets/badminton-hero.png'
+import { motion, useReducedMotion } from "framer-motion";
 
-const icons = [CircleDot, Dumbbell, LampDesk, ParkingCircle]
-const positions = ['68% center', '18% center', 'center', '94% center']
+import { ArrowUpRight, Ban, CircleDot, Coffee, LampDesk, Moon, ParkingCircle, Shirt, Sun, Toilet, Wifi } from "lucide-react";
 
-function GalleryItem({ item, index, reduce }) {
-  const Icon = icons[index] || CircleDot
-  const base = 'group relative isolate min-h-[250px] overflow-hidden bg-[#1d382e]'
-  const image = <img src={heroImage} alt="" aria-hidden="true" style={{ objectPosition: positions[index] }} onError={(event) => { event.currentTarget.style.display = 'none' }} className="absolute inset-0 z-0 size-full object-cover transition duration-700 group-hover:scale-[1.035]"/>
-  const caption = <div><p className="mb-2 text-[9px] font-bold uppercase tracking-[.18em] text-[#c6c99c]">{item.category} · Visual placeholder</p><h2 className="text-xl font-semibold text-ivory">{item.title}</h2><p className="mt-2 max-w-sm text-xs leading-5 text-ivory/70">{item.description}</p></div>
-  const style = { duration: .45, delay: index * .06 }
-  if (index === 1) return <motion.figure initial={reduce ? false : { opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={style} className={`${base} flex min-h-[240px] items-stretch`}>
-    <div className="relative z-0 w-[40%] shrink-0 overflow-hidden">{image}<div className="absolute inset-0 z-10 bg-[#102a22]/35"/></div><figcaption className="relative z-10 flex flex-1 flex-col justify-between bg-[#29483a] p-5 md:p-7"><Icon size={18} className="text-[#c6c99c]"/>{caption}</figcaption>
-  </motion.figure>
-  if (index === 3) return <motion.figure initial={reduce ? false : { opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={style} className={`${base} min-h-[240px]`}>
-    {image}<div className="absolute inset-0 z-10 bg-gradient-to-r from-[#102a22]/80 via-[#102a22]/25 to-[#102a22]/45"/><figcaption className="absolute inset-x-0 bottom-0 z-20 flex items-end gap-4 border-t border-white/15 bg-[#102a22]/65 p-5 backdrop-blur-[2px] md:p-6"><Icon className="mb-1 shrink-0 text-[#c6c99c]" size={18}/>{caption}</figcaption>
-  </motion.figure>
-  return <motion.figure initial={reduce ? false : { opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: .15 }} transition={style} className={`${base} ${index === 0 ? 'min-h-[420px] md:col-span-7 md:row-span-2' : 'min-h-[240px] md:col-span-5'}`}>
-    {image}<div className="absolute inset-0 z-10 bg-gradient-to-t from-[#102a22]/95 via-[#102a22]/20 to-[#102a22]/10"/><figcaption className="absolute inset-x-0 bottom-0 z-20 flex items-end justify-between gap-4 p-6 md:p-8"><div className="flex items-start gap-4"><Icon className="mt-1 shrink-0 text-[#c6c99c]" size={18}/>{caption}</div><span className="font-display text-3xl italic text-white/45">0{index + 1}</span></figcaption>
-  </motion.figure>
+import { Link } from "react-router-dom";
+import { facilities } from "../data/facilities";
+
+import heroImage from "../assets/badminton-hero.png";
+import courtImage from "../assets/LapanganContoh.png";
+import waitingImage from "../assets/RuangTnggu.png";
+import lightingImage from "../assets/PencahayaanContoh.png";
+import parkingImage from "../assets/ParkirContoh.png";
+
+/* ==========================================
+   GALLERY CONFIGURATION
+========================================== */
+
+const gallery = [
+  {
+    image: courtImage,
+    icon: CircleDot,
+    number: "01",
+    position: "center",
+    layout: "lg:col-span-7 lg:row-span-3",
+    featured: true,
+  },
+  {
+    image: waitingImage,
+    icon: LampDesk,
+    number: "02",
+    position: "center",
+    layout: "lg:col-span-5 lg:row-span-2",
+    featured: false,
+  },
+  {
+    image: lightingImage,
+    icon: Sun,
+    number: "03",
+    position: "center",
+    layout: "lg:col-span-5 lg:row-span-3",
+    featured: false,
+  },
+  {
+    image: parkingImage,
+    icon: ParkingCircle,
+    number: "04",
+    position: "center",
+    layout: "lg:col-span-7 lg:row-span-2",
+    featured: false,
+  },
+];
+
+const venueRules = [
+  "Gunakan sepatu khusus indoor. Sepatu dari luar tidak boleh dipakai di area lapangan.",
+  "Dilarang merokok di area lapangan.",
+  "Dilarang meludah di area lapangan.",
+  "Tidak diperkenankan membawa shuttlecock dari luar.",
+  "Tidak diperkenankan membawa makanan dan minuman dari luar.",
+];
+
+const extraFacilities = [
+  { name: "Mushala", Icon: Moon },
+  { name: "Free Wi-Fi", Icon: Wifi },
+  { name: "Toilet", Icon: Toilet },
+  { name: "Kantin", Icon: Coffee },
+  { name: "Ruang Ganti Pakaian", Icon: Shirt },
+];
+
+/* ==========================================
+   FACILITY GALLERY ITEM
+========================================== */
+
+function GalleryItem({ item, index }) {
+  const visual = gallery[index];
+  const Icon = visual.icon;
+  const reducedMotion = useReducedMotion();
+
+  return (
+    <motion.figure
+      initial={reducedMotion ? false : { opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{
+        once: true,
+        amount: 0.12,
+      }}
+      transition={{
+        duration: 0.55,
+        delay: reducedMotion ? 0 : index * 0.07,
+        ease: [0.22, 1, 0.36, 1],
+      }}
+      className={`
+        group relative isolate
+        min-h-[280px]
+        overflow-hidden
+        rounded-[6px]
+        bg-[#17372d]
+        lg:min-h-0
+        ${visual.layout}
+      `}
+    >
+      {/* FACILITY IMAGE */}
+      <img
+        src={visual.image}
+        alt={item.title}
+        loading={index === 0 ? "eager" : "lazy"}
+        style={{ objectPosition: visual.position }}
+        className="
+          absolute inset-0
+          h-full w-full
+          object-cover
+          transition-transform
+          duration-[900ms]
+          ease-[cubic-bezier(.22,1,.36,1)]
+          group-hover:scale-[1.025]
+          motion-reduce:transform-none
+        "
+      />
+
+      {/* GRADIENT OVERLAY */}
+      <div
+        className="
+          pointer-events-none
+          absolute inset-0
+          bg-gradient-to-t
+          from-[#071b14]/95
+          via-[#071b14]/25
+          to-transparent
+        "
+      />
+
+      {/* TOP ICON AND NUMBER */}
+      <div
+        className="
+          absolute inset-x-0 top-0
+          z-10
+          flex items-start justify-between
+          p-5 md:p-6
+        "
+      >
+        <span
+          className="
+            flex size-9
+            items-center justify-center
+            rounded-full
+            border border-white/25
+            bg-[#102a22]/25
+            text-[#d6c18c]
+            backdrop-blur-sm
+          "
+        >
+          <Icon size={17} strokeWidth={1.5} />
+        </span>
+
+        <span
+          className="
+            font-display
+            text-2xl italic
+            text-white/70
+          "
+        >
+          {visual.number}
+        </span>
+      </div>
+
+      {/* FACILITY INFORMATION */}
+      <figcaption
+        className={`
+          absolute inset-x-0 bottom-0
+          z-10
+          ${visual.featured ? "p-7 lg:p-10" : "p-6"}
+        `}
+      >
+        {/* DECORATIVE LINE */}
+        <div
+          className="
+            mb-4 h-px w-9
+            bg-[#d6c18c]
+            transition-all duration-500
+            group-hover:w-16
+          "
+        />
+
+        {/* CATEGORY */}
+        <p
+          className="
+            mb-2
+            text-[9px] font-semibold
+            uppercase tracking-[0.2em]
+            text-[#d6c18c]
+          "
+        >
+          {item.category || "Fasilitas venue"}
+        </p>
+
+        {/* TITLE */}
+        <h3
+          className={`
+            font-semibold
+            tracking-[-0.035em]
+            text-[#f3f1e9]
+            ${visual.featured ? "text-3xl lg:text-[38px]" : "text-xl md:text-2xl"}
+          `}
+        >
+          {item.title}
+        </h3>
+
+        {/* DESCRIPTION */}
+        <p
+          className={`
+            mt-3 max-w-[390px]
+            leading-relaxed
+            text-white/75
+            ${visual.featured ? "text-sm" : "text-xs md:text-sm"}
+          `}
+        >
+          {item.description}
+        </p>
+      </figcaption>
+
+      {/* SUBTLE BORDER */}
+      <div
+        className="
+          pointer-events-none
+          absolute inset-0
+          rounded-[6px]
+          border border-white/10
+          transition-colors duration-500
+          group-hover:border-[#d6c18c]/35
+        "
+      />
+    </motion.figure>
+  );
 }
 
+/* ==========================================
+   FACILITIES PAGE
+========================================== */
+
 export default function FacilitiesPage() {
-  const reduce = useReducedMotion()
-  return <main className="bg-[#e1e2d7]">
-    <header className="relative isolate overflow-hidden bg-[#102a22] px-5 pb-14 pt-14 text-ivory md:px-8 md:pb-20 md:pt-20">
-      <img src={heroImage} alt="" aria-hidden="true" className="absolute inset-y-0 right-0 -z-10 h-full w-full object-cover object-[70%_center] opacity-25 md:w-[62%]"/><div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,#102a22_0%,rgba(16,42,34,.95)_45%,rgba(16,42,34,.35)_100%)]"/>
-      <motion.div initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .5 }} className="mx-auto grid w-full max-w-[1240px] gap-6 md:grid-cols-[1fr_.55fr] md:items-end"><div><p className="mb-5 text-[10px] font-bold uppercase tracking-[.2em] text-[#c6c99c]">Fasilitas</p><h1 className="max-w-3xl text-5xl font-semibold leading-[.94] tracking-[-.06em] md:text-7xl">Nyaman untuk <span className="font-display font-normal italic text-[#c6c99c]">setiap permainan.</span></h1></div><p className="max-w-md text-sm leading-7 text-ivory/70">Kenali ruang-ruang pendukung pengalaman bermain. Gambar dan keterangannya ditandai sebagai placeholder sampai detail venue dikonfirmasi.</p></motion.div>
-    </header>
-    <section className="px-5 py-10 md:px-8 md:py-14"><div className="mx-auto max-w-[1240px]"><div className="mb-6 flex items-center justify-between border-b border-[#b9bdaf] pb-3"><p className="text-[9px] font-bold uppercase tracking-[.18em] text-[#536457]">Galeri venue · 01—04</p><p className="text-[10px] text-[#73796e]">Visual konsep</p></div><div className="grid gap-3 md:grid-cols-12 md:grid-rows-[minmax(240px,22vw)_minmax(220px,20vw)]">{facilities.map((item, index) => <div key={item.id} className={index === 0 ? 'md:col-span-7 md:row-span-2' : index === 1 ? 'md:col-span-5' : index === 2 ? 'md:col-span-3' : 'md:col-span-2'}><GalleryItem item={item} index={index} reduce={reduce}/></div>)}</div><div className="mt-8 flex items-center justify-between gap-4 border-t border-[#b9bdaf] pt-5"><p className="max-w-2xl text-xs leading-5 text-[#657065]">Informasi aktual tentang fasilitas, perlengkapan, kapasitas, dan akses akan diperbarui setelah dikonfirmasi pengelola venue.</p><Link to="/booking" className="inline-flex shrink-0 items-center gap-2 border-b border-[#8c9e84] pb-1 text-xs font-semibold text-[#234635] transition hover:text-[#416d52]">Jadwal Booking <ArrowUpRight size={14}/></Link></div></div></section>
-  </main>
+  const reducedMotion = useReducedMotion();
+
+  const visibleFacilities = facilities.slice(0, 4);
+
+  return (
+    <main className="min-h-screen bg-[#e6e7de]">
+      {/* =====================================
+          PAGE HEADER
+      ===================================== */}
+
+      <header
+        className="
+          relative isolate
+          overflow-hidden
+          bg-[#102a22]
+          px-5 py-20
+          text-[#f3f1e9]
+          md:px-8 md:py-28
+        "
+      >
+        {/* HERO BACKGROUND */}
+        <img
+          src={heroImage}
+          alt=""
+          aria-hidden="true"
+          className="
+            absolute inset-0 -z-10
+            h-full w-full
+            object-cover
+            object-[70%_center]
+            opacity-20
+          "
+        />
+
+        {/* HERO GRADIENT */}
+        <div
+          className="
+            absolute inset-0 -z-10
+            bg-gradient-to-r
+            from-[#102a22]
+            via-[#102a22]/95
+            to-[#102a22]/60
+          "
+        />
+
+        <div className="mx-auto max-w-[1240px]">
+          <motion.div
+            initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.65,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+          >
+            {/* EYEBROW */}
+            <div
+              className="
+                mb-7 flex items-center gap-4
+                text-[10px] font-semibold
+                uppercase tracking-[0.25em]
+                text-[#d6c18c]
+              "
+            >
+              <span className="h-px w-9 bg-[#d6c18c]" />
+              Gajah Berlian Sports Hall
+            </div>
+
+            {/* HEADING */}
+            <h1
+              className="
+                max-w-[850px]
+                text-[clamp(2.8rem,6vw,5rem)]
+                font-semibold
+                leading-[1.02]
+                tracking-[-0.055em]
+              "
+            >
+              Lebih dari sekadar
+              <br />
+              <span
+                className="
+                  font-display
+                  font-normal italic
+                  text-[#d6c18c]
+                "
+              >
+                tempat bermain.
+              </span>
+            </h1>
+
+            {/* DESCRIPTION */}
+            <p
+              className="
+                mt-7 max-w-[480px]
+                text-sm leading-7
+                text-[#f3f1e9]/65
+              "
+            >
+              Jelajahi ruang dan fasilitas yang melengkapi setiap sesi permainanmu, mulai dari lapangan hingga area parkir.
+            </p>
+          </motion.div>
+        </div>
+      </header>
+
+      {/* =====================================
+          FACILITIES GALLERY
+      ===================================== */}
+
+      <section className="px-5 py-16 md:px-8 md:py-24">
+        <div className="mx-auto max-w-[1240px]">
+          {/* SECTION HEADING */}
+          <div
+            className="
+              mb-8 flex flex-wrap
+              items-end justify-between
+              gap-5
+              border-b border-[#17372d]/20
+              pb-5
+            "
+          >
+            <div>
+              <p
+                className="
+                  mb-3
+                  text-[10px] font-bold
+                  uppercase tracking-[0.22em]
+                  text-[#687568]
+                "
+              >
+                The spaces
+              </p>
+
+              <h2
+                className="
+                  text-2xl font-semibold
+                  tracking-[-0.035em]
+                  text-[#17372d]
+                  md:text-3xl
+                "
+              >
+                Jelajahi fasilitas
+              </h2>
+            </div>
+
+            <span className="text-xs text-[#687568]">01 / 04</span>
+          </div>
+
+          {/* GALLERY GRID */}
+          <div
+            className="
+              grid gap-3
+              md:grid-cols-2
+              lg:h-[780px]
+              lg:grid-cols-12
+              lg:grid-rows-5
+            "
+          >
+            {visibleFacilities.map((item, index) => (
+              <GalleryItem key={item.id ?? index} item={item} index={index} />
+            ))}
+          </div>
+
+          {/* VENUE RULES */}
+          <section aria-labelledby="venue-rules-title" className="mt-16 overflow-hidden rounded-[8px] bg-[#17372d] text-[#f3f1e9] shadow-[0_18px_48px_rgba(23,55,45,.12)] md:mt-20">
+            <div className="grid lg:grid-cols-[.72fr_1.28fr]">
+              <div className="border-b border-white/10 p-6 md:p-9 lg:border-b-0 lg:border-r">
+                <p className="mb-4 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[.22em] text-[#d6c18c]"><Ban size={14}/> Panduan venue</p>
+                <h2 id="venue-rules-title" className="max-w-sm font-display text-4xl italic leading-[1.02] text-[#f3f1e9] md:text-5xl">Harap Diperhatikan!</h2>
+                <p className="mt-5 max-w-sm text-sm leading-6 text-white/65">Agar semua pemain nyaman dan area lapangan tetap terjaga, mohon ikuti aturan berikut.</p>
+              </div>
+              <ol className="grid gap-x-8 px-6 py-2 sm:grid-cols-2 md:px-9 md:py-4">
+                {venueRules.map((rule, index) => (
+                  <li key={rule} className="flex gap-4 border-b border-white/10 py-5 last:border-0 sm:[&:nth-last-child(2)]:border-0">
+                    <span className="mt-0.5 grid size-7 shrink-0 place-items-center rounded-full border border-[#d6c18c]/50 font-display text-sm italic text-[#d6c18c]">0{index + 1}</span>
+                    <p className="text-sm leading-6 text-white/80">{rule}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          </section>
+
+          {/* ICON-ONLY AMENITIES; PARKING IS ALREADY IN THE PHOTO GALLERY */}
+          <section aria-labelledby="extra-facilities-title" className="mt-16 md:mt-20">
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-[#17372d]/20 pb-4">
+              <div>
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-[.22em] text-[#687568]">Fasilitas pendukung</p>
+                <h2 id="extra-facilities-title" className="text-2xl font-semibold tracking-[-.035em] text-[#17372d] md:text-3xl">Yang tersedia untukmu</h2>
+              </div>
+              <p className="text-xs text-[#687568]">Ditampilkan dengan ikon</p>
+            </div>
+            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+              {extraFacilities.map(({ name, Icon }) => (
+                <li key={name} className="flex min-h-[132px] flex-col items-center justify-center gap-3 rounded-[6px] border border-[#17372d]/10 bg-[#f4f3ed] px-3 py-5 text-center shadow-[0_6px_18px_rgba(23,55,45,.05)] transition-colors duration-200 hover:bg-white">
+                  <span className="grid size-12 place-items-center rounded-full bg-[#e6e9df] text-[#315c49]"><Icon size={21} strokeWidth={1.7}/></span>
+                  <span className="text-sm font-semibold text-[#26382f]">{name}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          {/* =================================
+              BOTTOM CTA
+          ================================= */}
+
+          <div
+            className="
+              mt-10
+              flex flex-col
+              justify-between
+              gap-6
+              border-t border-[#17372d]/20
+              pt-7
+              sm:flex-row
+              sm:items-center
+            "
+          >
+            {/* TEXT */}
+            <div>
+              <p
+                className="
+                  mb-2 text-sm
+                  font-semibold
+                  text-[#17372d]
+                "
+              >
+                Siap untuk bermain?
+              </p>
+
+              <p
+                className="
+                  max-w-[450px]
+                  text-xs leading-6
+                  text-[#687568]
+                "
+              >
+                Pilih jadwal yang sesuai dan lanjutkan reservasi lapanganmu.
+              </p>
+            </div>
+
+            {/* BOOKING LINK */}
+            <Link
+              to="/booking"
+              className="
+                group inline-flex
+                items-center justify-between
+                gap-8
+                border-b border-[#17372d]
+                pb-2
+                text-sm font-semibold
+                text-[#17372d]
+                transition-colors duration-300
+                hover:text-[#54735b]
+                focus-visible:outline-2
+                focus-visible:outline-offset-4
+              "
+            >
+              Lihat Jadwal Booking
+              <ArrowUpRight
+                size={18}
+                className="
+                  transition-transform
+                  duration-300
+                  group-hover:-translate-y-1
+                  group-hover:translate-x-1
+                  motion-reduce:transform-none
+                "
+              />
+            </Link>
+          </div>
+        </div>
+      </section>
+    </main>
+  );
 }

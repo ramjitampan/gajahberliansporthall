@@ -40,7 +40,7 @@ export default function BookingProblem() {
             </span>
           </div>
           <Reveal delay={100} className="glass-panel rounded-2xl p-5 md:p-7">
-            <p className="mb-5 text-[9px] font-bold uppercase tracking-[.18em] text-sage">Dengan BadminLap.id</p>
+            <p className="mb-5 text-[9px] font-bold uppercase tracking-[.18em] text-sage">Dengan GajahBerlianSportsHall</p>
             <ul className="divide-y divide-white/10 border-y border-white/10">
               {newWays.map((text, i) => (
                 <li key={text} className="flex items-center gap-4 py-4">

@@ -5,5 +5,4 @@ export const durations = [1, 2, 3, 4]
 export const bookedByCourt = {
   'court-1': [9, 10, 18],
   'court-2': [12, 15, 16],
-  'court-3': [8, 13, 19, 20],
 }

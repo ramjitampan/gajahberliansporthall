@@ -22,7 +22,11 @@ export default function AdvantagesSection() {
         </Reveal>
         <div className="border-t border-white/15">
           {benefits.map(({ icon: Icon, number, title, copy }, i) => (
-            <Reveal key={number} delay={i * 45} className="group grid grid-cols-[42px_1fr_auto] items-center gap-3 border-b border-white/15 py-5 transition-colors duration-300 hover:bg-white/[0.035] md:grid-cols-[48px_1fr_1fr_auto] md:gap-5 md:py-6">
+            <Reveal
+              key={number}
+              delay={i * 45}
+              className="group grid grid-cols-[42px_1fr_auto] items-center gap-3 border-b border-white/15 py-5 transition-colors duration-300 hover:bg-white/[0.035] md:grid-cols-[48px_1fr_1fr_auto] md:gap-5 md:py-6"
+            >
               <span className="font-display text-xl italic text-champagne">{number}</span>
               <div className="flex items-center gap-3">
                 <Icon size={17} className="shrink-0 text-sage" />

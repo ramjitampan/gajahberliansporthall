@@ -5,7 +5,7 @@ import { useBooking } from "../hooks/useBooking";
 import { paymentService } from "../services/paymentService";
 import { rupiah, totalPrice } from "../utils/booking";
 export default function PaymentPage() {
-  const { booking, update, ensureCode } = useBooking();
+  const { booking, update, ensureCode, completeBooking } = useBooking();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -24,9 +24,9 @@ export default function PaymentPage() {
     setBusy(true);
     setError("");
     try {
-      await paymentService.simulate(status);
+      const result = await paymentService.simulate(status);
       if (status === "success") {
-        update({ paid: true, paymentStatus: "paid" });
+        completeBooking(result?.paidAt);
         navigate("/booking/konfirmasi");
       } else {
         update({ paid: false, paymentStatus: status });
@@ -56,7 +56,7 @@ export default function PaymentPage() {
       <div className="grid items-start gap-7 lg:grid-cols-[1.4fr_.65fr]">
         <section className="flex flex-col items-center border border-line bg-paper p-5.5 md:p-8.5">
           <div className="self-start bg-[#fff4d8] px-3 py-2 text-[11px] font-bold uppercase tracking-[.08em] text-[#795e24]">
-            <i className="mr-1.5 inline-block size-1.5 animate-pulse-soft rounded-full bg-[#c28d24]" /> {booking.paymentStatus === "expired" ? "Sesi kedaluwarsa · demo" : booking.paymentStatus === "failed" ? "Pembayaran belum berhasil · demo" : "Menunggu pembayaran · demo"}
+            <i className="mr-1.5 inline-block size-1.5 rounded-full bg-[#c28d24]" /> {booking.paymentStatus === "expired" ? "Sesi kedaluwarsa · demo" : booking.paymentStatus === "failed" ? "Pembayaran belum berhasil · demo" : "Menunggu pembayaran · demo"}
           </div>
           <div className="my-6 flex w-full justify-between text-xs text-muted">
             <span>Kode booking</span>
@@ -73,7 +73,7 @@ export default function PaymentPage() {
                 <i key={i} className={(i * 7 + i * i) % 5 < 2 || [0, 1, 2, 9, 10, 11, 18, 19, 20, 6, 7, 8, 15, 16, 17, 24, 25, 26].includes(i) ? "bg-ink" : "bg-white"} />
               ))}
             </div>
-            <b className="mt-3 block">BadminLap.id</b>
+            <b className="mt-3 block">GajahBerlianSportsHall</b>
             <small className="text-muted">Bukan kode pembayaran nyata</small>
           </div>
           <ol className="my-7 self-stretch pl-7 text-[13px] leading-7 text-muted">
