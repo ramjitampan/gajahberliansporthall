@@ -11,10 +11,25 @@ import AboutPage from "./pages/AboutPage";
 import FacilitiesPage from "./pages/FacilitiesPage";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
 import LocationPage from "./pages/LocationPage";
+import AuthLayout from "./layouts/AuthLayout";
+import AuthPage from "./pages/AuthPage";
+import AdminLayout from "./layouts/AdminLayout";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminHistoryPage from "./pages/AdminHistoryPage";
+import ErrorPreviewPage from "./pages/ErrorPreviewPage";
 
 export default function App() {
   return (
     <Routes>
+      {import.meta.env.DEV && <Route path="/__error-preview/:type" element={<ErrorPreviewPage />} />}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<AuthPage mode="login" />} />
+        <Route path="/register" element={<AuthPage mode="register" />} />
+      </Route>
+      <Route path="admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="history" element={<AdminHistoryPage />} />
+      </Route>
       <Route element={<SiteLayout />}>
         <Route index element={<HomePage />} />
         <Route path="tentang" element={<AboutPage />} />

@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Frontend_Demo-orange?style=flat-square)
 
-**[Overview](#-overview) · [Tech Stack](#-tech-stack) · [Booking Flow](#-booking-flow) · [Backend Integration](#-backend-integration-guide) · [Getting Started](#-getting-started)**
+**[Overview](#-overview) · [Tech Stack](#-tech-stack) · [Booking Flow](#-booking-flow) · [Backend Guide](#-backend-integration-guide) · [Release Handoff](#-release-handoff) · [Getting Started](#-getting-started)**
 
 </div>
 
@@ -288,6 +288,57 @@ Jangan menyebarkan request API langsung ke banyak komponen. Pastikan file enviro
 | Webhook dikirim lebih dari sekali | Pembayaran tidak diproses ganda |
 | Booking belum dibayar hingga expiry | Slot dilepas sesuai kebijakan |
 | Pembayaran gagal / dibatalkan | Status booking dan pembayaran tetap konsisten |
+
+## ✦ Release Handoff
+
+> Catatan implementasi untuk Nobel: frontend sudah menyiapkan tampilan dan alur pemulihan. Integrasi API, autentikasi, otorisasi, serta data produksi tetap menjadi pekerjaan backend sebelum fitur terkait digunakan dengan data nyata.
+
+### Frontend routes
+
+| Route | Fungsi | Status integrasi |
+| :-- | :-- | :-- |
+| `/` | Beranda pelanggan | Frontend |
+| `/tentang`, `/fasilitas`, `/daftar-harga`, `/lokasi` | Informasi venue | Frontend |
+| `/booking` dan langkah checkout | Pemilihan jadwal, data pemesan, pembayaran, konfirmasi | Demo; belum tersambung backend |
+| `/booking/riwayat` dan `/booking/riwayat/:code` | Riwayat dan struk lokal | Data browser (`localStorage`) |
+| `/login`, `/register` | Form autentikasi | UI saja; belum ada API atau sesi |
+| `/admin`, `/admin/history` | Dashboard jadwal demo dan riwayat | UI saja; belum ada perlindungan akses |
+| Rute frontend yang tidak dikenal | Pengalaman 404 bermerek | Client-side; bukan HTTP 404 |
+
+Rute `/__error-preview/:type` hanya terdaftar pada development (`import.meta.env.DEV`) dan tidak disertakan dalam bundle produksi.
+
+### Error experience & recovery
+
+- `ErrorExperience` menyediakan tampilan reusable untuk `404`, `403`, `500`, `502`, `503`, `504`, `offline`, dan `runtime`. Tampilan status HTTP siap digunakan saat API menyediakan status aktual; frontend tidak membuat status palsu atau mengarahkan pengguna ke URL error buatan.
+- `AppErrorBoundary` menangkap error saat React merender UI dan menampilkan fallback runtime. Detail diagnostik dicatat di development; boundary tidak menangani kegagalan request API.
+- `OfflineNotice` memantau event `online`/`offline` dan `navigator.onLine`. Indikator browser ini bukan bukti bahwa API/backend dapat dijangkau. Retry memeriksa halaman saat ini dan tidak mengalihkan formulir yang mungkin berisi input belum tersimpan.
+- Aksi pemulihan tersedia sesuai state, seperti kembali ke beranda, mencoba kembali, atau memuat ulang. Saat integrasi API ditambahkan, retry untuk operasi tertentu sebaiknya memakai callback request itu sendiri agar input pengguna tidak hilang.
+
+### Vercel SPA routing
+
+`vercel.json` mengirim rute frontend ke `/index.html` agar React Router dapat menangani kunjungan langsung dan refresh. Path `/api`, `/assets`, dan path file berekstensi dikecualikan dari rewrite. Uji kunjungan langsung serta refresh pada preview deployment Vercel sebelum rilis. Fallback SPA menampilkan 404 di sisi React, tetapi tidak dengan sendirinya menghasilkan HTTP status 404.
+
+### API error mapping
+
+Belum ada API client atau kontrak error backend yang terhubung. Setelah API tersedia:
+
+1. API/service layer membaca status HTTP dan payload error yang benar-benar diterima; jangan menyimpulkan status dari kegagalan `fetch` atau `navigator.onLine`.
+2. Petakan status terkonfirmasi seperti `403`, `500`, `502`, `503`, atau `504` ke state `ErrorExperience` pada konteks halaman/request terkait. Jangan redirect ke route buatan untuk menirukan status.
+3. Berikan callback retry khusus operasi. Ulangi hanya operasi yang aman diulang, dan pertahankan input form yang belum tersimpan.
+4. Sepakati format payload, kode error, timeout, dan perilaku retry bersama backend. Secret harus tetap di server; jangan simpan credential privat di variabel `VITE_*`.
+
+### Admin access & data protection
+
+Route admin saat ini dapat dibuka tanpa autentikasi, sesi, atau pemeriksaan role. Riwayat admin memakai data demo browser, bukan dataset pelanggan dari server. **Jangan anggap panel admin aman dan jangan hubungkan data pelanggan nyata sebelum backend menerapkan autentikasi serta otorisasi pada setiap endpoint admin.** Pemeriksaan route di frontend kelak hanya lapisan UX; backend harus tetap menjadi otoritas akses.
+
+### Release checklist
+
+- [ ] Uji refresh langsung untuk route pelanggan, `/login`, `/register`, `/admin`, dan `/admin/history` pada preview Vercel.
+- [ ] Uji pengalaman 404, runtime recovery, notifikasi offline, tema gelap/terang, bahasa ID/EN, serta layout mobile di browser.
+- [ ] Sepakati kontrak API, payload error, autentikasi/otorisasi admin, dan sumber data booking sebelum menghubungkan data produksi.
+- [ ] Jalankan `npm run build` sebelum rilis.
+
+Build Vite saat ini berhasil, dengan peringatan ukuran chunk JavaScript yang melewati 500 kB. Pemecahan chunk dapat ditinjau sebagai optimasi terpisah.
 
 ## ⚠️ Demo Limitations
 

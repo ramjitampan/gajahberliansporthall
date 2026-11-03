@@ -5,6 +5,8 @@ import App from "./App";
 import { BookingProvider } from "./hooks/useBooking";
 import { ThemeProvider } from "./hooks/useTheme";
 import { I18nProvider } from "./i18n/I18nContext";
+import AppErrorBoundary from "./components/AppErrorBoundary";
+import OfflineNotice from "./components/OfflineNotice";
 import "./styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -13,7 +15,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <ThemeProvider>
         <I18nProvider>
           <BookingProvider>
-            <App />
+            <AppErrorBoundary>
+              <App />
+              <OfflineNotice />
+            </AppErrorBoundary>
           </BookingProvider>
         </I18nProvider>
       </ThemeProvider>
