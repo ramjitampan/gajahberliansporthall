@@ -106,6 +106,24 @@ export const apiClient = {
     return request('/auth/me');
   },
 
+  // Admin
+  async getAdminMetrics() {
+    return request('/admin/dashboard/metrics');
+  },
+
+  async createMaintenanceBlock(dto) {
+    return request('/admin/schedules/maintenance', {
+      method: 'POST',
+      body: JSON.stringify(dto),
+    });
+  },
+
+  async deleteMaintenanceBlock(id) {
+    return request(`/admin/schedules/maintenance/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  },
+
   logout() {
     localStorage.removeItem('access_token');
     localStorage.removeItem('refresh_token');

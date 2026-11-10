@@ -14,6 +14,7 @@ import LocationPage from "./pages/LocationPage";
 import AuthLayout from "./layouts/AuthLayout";
 import AuthPage from "./pages/AuthPage";
 import AdminLayout from "./layouts/AdminLayout";
+import AdminRoute from "./components/AdminRoute";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminHistoryPage from "./pages/AdminHistoryPage";
 import ErrorPreviewPage from "./pages/ErrorPreviewPage";
@@ -26,9 +27,11 @@ export default function App() {
         <Route path="/login" element={<AuthPage mode="login" />} />
         <Route path="/register" element={<AuthPage mode="register" />} />
       </Route>
-      <Route path="admin" element={<AdminLayout />}>
-        <Route index element={<AdminDashboardPage />} />
-        <Route path="history" element={<AdminHistoryPage />} />
+      <Route path="admin" element={<AdminRoute />}>
+        <Route element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="history" element={<AdminHistoryPage />} />
+        </Route>
       </Route>
       <Route element={<SiteLayout />}>
         <Route index element={<HomePage />} />

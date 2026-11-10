@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
+import { AuthProvider } from "./context/AuthContext";
 import { BookingProvider } from "./hooks/useBooking";
 import { ThemeProvider } from "./hooks/useTheme";
 import { I18nProvider } from "./i18n/I18nContext";
@@ -14,12 +15,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <ThemeProvider>
         <I18nProvider>
-          <BookingProvider>
-            <AppErrorBoundary>
-              <App />
-              <OfflineNotice />
-            </AppErrorBoundary>
-          </BookingProvider>
+          <AuthProvider>
+            <BookingProvider>
+              <AppErrorBoundary>
+                <App />
+                <OfflineNotice />
+              </AppErrorBoundary>
+            </BookingProvider>
+          </AuthProvider>
         </I18nProvider>
       </ThemeProvider>
     </BrowserRouter>

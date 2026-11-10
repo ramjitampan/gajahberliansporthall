@@ -1,18 +1,27 @@
-import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { ArrowUpRight, Globe, History, LayoutDashboard, Moon, Sun } from "lucide-react";
+import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { ArrowUpRight, Globe, History, LayoutDashboard, LogOut, Moon, Sun, User } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../hooks/useTheme";
 import { useTranslation } from "../i18n/I18nContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminLayout() {
   const { pathname } = useLocation();
+  const navigate = useNavigate();
   const { t, lang, toggleLang } = useTranslation();
   const { isDark, toggleTheme } = useTheme();
+  const { user, logout } = useAuth();
   const reduceMotion = useReducedMotion();
+
   const links = [
     { to: "/admin", end: true, label: t("admin.navDashboard"), number: "01", icon: LayoutDashboard },
     { to: "/admin/history", label: t("admin.navHistory"), number: "02", icon: History },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="min-h-screen bg-[#f4f2eb] font-sans text-ink dark:bg-[#0b1512] dark:text-cream">
@@ -27,9 +36,29 @@ export default function AdminLayout() {
           </Link>
 
           <div className="flex shrink-0 items-center gap-2 md:gap-3">
+            {/* Admin identity pill */}
+            <div className="hidden items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-left sm:flex">
+              <span className="grid size-6 place-items-center rounded-full bg-[#c8ae78] text-[10px] font-black text-[#102a22]">
+                A
+              </span>
+              <div className="leading-tight">
+                <span className="block text-[11px] font-bold text-white max-w-[120px] truncate">{user?.name || "Admin"}</span>
+                <span className="block text-[9px] text-white/50">{user?.role}</span>
+              </div>
+            </div>
+
             <button type="button" onClick={toggleLang} aria-label={t("admin.toggleLanguage")} title={t("admin.toggleLanguage")} className="inline-flex min-h-10 items-center gap-2 border border-white/20 px-2.5 text-[10px] font-bold text-white/85 transition hover:border-[#c8ae78]/70 hover:text-[#e2d2a9] md:px-3"><Globe size={14} className="text-[#c8ae78]" />{lang.toUpperCase()}</button>
             <button type="button" onClick={toggleTheme} aria-label={isDark ? t("admin.lightTheme") : t("admin.darkTheme")} title={isDark ? t("admin.lightTheme") : t("admin.darkTheme")} className="grid size-10 place-items-center border border-white/20 text-white/85 transition hover:border-[#c8ae78]/70 hover:text-[#e2d2a9]">{isDark ? <Sun size={16} /> : <Moon size={16} />}</button>
             <Link to="/" className="hidden min-h-10 items-center gap-2 border border-white/20 px-3 text-[11px] font-semibold text-white/75 transition hover:border-white/50 hover:text-white sm:inline-flex">{t("admin.customerSite")}<ArrowUpRight size={13} /></Link>
+            <button
+              type="button"
+              onClick={handleLogout}
+              title={t("nav.logout")}
+              aria-label={t("nav.logout")}
+              className="grid size-10 place-items-center border border-red-500/30 text-red-300 transition hover:bg-red-500/10 hover:border-red-400"
+            >
+              <LogOut size={15} />
+            </button>
           </div>
         </div>
 
