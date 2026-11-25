@@ -16,6 +16,29 @@
   font-family:"DM Sans",sans-serif;
   transition:background-color .2s,color .2s;
 }
+/* Keep the shared approved navbar readable even while route transition effects run. */
+.gb-history-navbar { color:#102B50; }
+.gb-history-navbar nav a { color:#596579; }
+.gb-history-navbar nav a[aria-current="page"] { color:#2457C5; border-color:#E95D24; }
+.gb-history-navbar > div:first-child > a span:last-child,
+.gb-history-navbar button,
+.gb-history-navbar .text-cream,
+.gb-history-navbar .text-cream\/65,
+.gb-history-navbar .text-cream\/50 { color:#102B50; }
+.gb-history-navbar > div:first-child > a span:first-child { color:#2457C5; }
+.gb-history-navbar a[href="/register"] { color:#fff; background:#E95D24; }
+.gb-history-navbar .absolute.top-full { color:#102B50; }
+.dark .gb-history-navbar { color:#F5EFE3; }
+.dark .gb-history-navbar nav a { color:#A9B5C8; }
+.dark .gb-history-navbar nav a[aria-current="page"] { color:#648DFF; border-color:#FF783D; }
+.dark .gb-history-navbar > div:first-child > a span:last-child,
+.dark .gb-history-navbar button,
+.dark .gb-history-navbar .text-cream,
+.dark .gb-history-navbar .text-cream\/65,
+.dark .gb-history-navbar .text-cream\/50 { color:#F5EFE3; }
+.dark .gb-history-navbar > div:first-child > a span:first-child { color:#648DFF; }
+.dark .gb-history-navbar a[href="/register"] { color:#fff; background:#FF783D; }
+.dark .gb-history-navbar .absolute.top-full { color:#F5EFE3; }
 .dark .gb-history-page {
   --gbh-bg:#0B1324;
   --gbh-surface:#111D32;

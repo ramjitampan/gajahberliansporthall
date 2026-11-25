@@ -1,13 +1,28 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowUpRight, Clock3, ReceiptText, Search, CreditCard, XCircle, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
-import { Button, PageHeading, StateBox } from "../components/UI";
+import {
+  AlertCircle,
+  ArrowUpRight,
+  CalendarDays,
+  Check,
+  CheckCircle,
+  Clock3,
+  CreditCard,
+  History,
+  ReceiptText,
+  RefreshCw,
+  Search,
+  XCircle,
+} from "lucide-react";
 import { courts } from "../data/bookingData";
 import { useBooking } from "../hooks/useBooking";
 import { localDate, rupiah, timeLabel, totalPrice } from "../utils/booking";
 import { useTranslation } from "../i18n/I18nContext";
 import { useAuth } from "../context/AuthContext";
 import { apiClient } from "../services/apiClient";
+import Reveal from "../components/Reveal";
+import "../styles/homepage.css";
+import "../styles/historypage.css";
 
 export default function BookingHistoryPage() {
   const { t } = useTranslation();
@@ -33,11 +48,16 @@ export default function BookingHistoryPage() {
       setRemoteBookings(Array.isArray(data) ? data : []);
     } catch (err) {
       console.warn("Failed to fetch customer bookings from API, fallback to local:", err);
-      // Fallback: local history
+      // Keep the local history intact when the legacy API is unavailable.
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    document.documentElement.classList.add("gb-home-active", "gb-history-active");
+    return () => document.documentElement.classList.remove("gb-home-active", "gb-history-active");
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -73,12 +93,12 @@ export default function BookingHistoryPage() {
       return localHistory.map((b) => ({
         bookingCode: b.code,
         courtId: b.courtId,
-        courtName: courts.find((c) => c.id === b.courtId)?.name || "Lapangan",
+        courtName: b.courtName || courts.find((c) => c.id === b.courtId)?.name || "Lapangan",
         date: b.date,
         startHour: b.startHour,
         duration: b.duration,
         endHour: Number(b.startHour) + Number(b.duration),
-        totalAmount: totalPrice(b.duration),
+        totalAmount: b.totalAmount ?? totalPrice(b.duration),
         status: b.paid ? "CONFIRMED" : "PENDING_PAYMENT",
         customerName: b.customer?.name,
       }));
@@ -97,218 +117,170 @@ export default function BookingHistoryPage() {
   }, [isAuthenticated, remoteBookings, localHistory, activeTab]);
 
   return (
-    <main className="mx-auto min-h-[70vh] w-[calc(100%-32px)] py-14 md:w-[min(1060px,calc(100%-48px))] md:py-20">
-      <PageHeading
-        eyebrow={t("historyPage.eyebrow")}
-        title={t("historyPage.title")}
-        copy={t("historyPage.copy")}
-      />
+    <div className="gb-history-page">
+      <div className="gbh-container">
+        <Reveal className="gbh-intro">
+          <p className="gbh-eyebrow"><span />{t("historyPage.eyebrow")}</p>
+          <h1>{t("historyPage.title")}</h1>
+          <p className="gbh-intro-copy">{t("historyPage.copy")}</p>
+        </Reveal>
 
-      {/* GUEST NOTICE & LOOKUP TOOL */}
-      {!isAuthenticated && (
-        <div className="mb-8 grid gap-4 border border-[#d8d0c0] bg-[#f7f3ea] p-5 dark:border-white/10 dark:bg-[#142620] sm:grid-cols-[1fr_auto] sm:items-center">
-          <div>
-            <div className="flex items-center gap-2 font-bold text-ink dark:text-cream">
-              <Clock3 size={17} className="text-emerald dark:text-sage" />
-              <span>Anda belum masuk ke akun</span>
+        {!isAuthenticated && (
+          <Reveal className="gbh-guest-notice gbh-glass">
+            <span className="gbh-guest-icon"><History size={19} strokeWidth={1.7} aria-hidden="true" /></span>
+            <div className="gbh-guest-copy">
+              <h2><Clock3 size={16} aria-hidden="true" />Anda belum masuk ke akun</h2>
+              <p>Riwayat di bawah hanya tersimpan di peramban ini. Masuk atau cari tanda bukti menggunakan Kode Booking.</p>
             </div>
-            <p className="mt-1 text-xs text-muted dark:text-cream/70">
-              Riwayat di bawah hanya tersimpan di peramban ini. Masuk atau cari tanda bukti menggunakan Kode Booking.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              to="/login?redirect=/booking/riwayat"
-              className="inline-flex min-h-10 items-center justify-center rounded-lg bg-emerald px-4 text-xs font-bold text-white hover:bg-emerald-soft dark:bg-sage dark:text-[#102a22]"
-            >
-              Masuk Akun
-            </Link>
-          </div>
-        </div>
-      )}
+            <Link to="/login?redirect=/booking/riwayat" className="gbh-button gbh-button-secondary">Masuk Akun</Link>
+          </Reveal>
+        )}
 
-      {/* SEARCH RECEIPT BY BOOKING CODE */}
-      <form onSubmit={handleSearchCode} className="mb-7 flex max-w-md gap-2">
-        <div className="relative flex-1">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted dark:text-cream/40" />
-          <input
-            type="text"
-            value={searchCode}
-            onChange={(e) => setSearchCode(e.target.value)}
-            placeholder="Cari kode booking (mis. GB-202611...)"
-            className="w-full rounded-lg border border-line bg-paper py-2.5 pl-10 pr-3 text-xs uppercase tracking-wider text-ink outline-none transition focus:border-emerald dark:border-white/15 dark:bg-[#182d25] dark:text-cream dark:focus:border-sage"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-lg border border-line px-4 text-xs font-bold text-ink transition hover:border-emerald hover:bg-paper dark:border-white/20 dark:text-cream dark:hover:border-sage"
-        >
-          Cek
-        </button>
-      </form>
+        <section className="gbh-tools" aria-label={t("historyPage.eyebrow")}>
+          <form onSubmit={handleSearchCode} className="gbh-search-form">
+            <div className="gbh-search-field">
+              <Search size={17} aria-hidden="true" />
+              <input
+                type="text"
+                value={searchCode}
+                onChange={(e) => setSearchCode(e.target.value)}
+                placeholder="Cari kode booking (mis. GB-202611...)"
+                aria-label="Cari kode booking"
+                className="gbh-search-input"
+              />
+            </div>
+            <button type="submit" className="gbh-button gbh-button-search">Cek</button>
+          </form>
 
-      {/* TABS FOR LOGGED-IN USERS */}
-      {isAuthenticated && (
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3 dark:border-white/10">
-          <div className="flex gap-2">
-            {[
-              { id: "all", label: "Semua" },
-              { id: "pending", label: "Menunggu Bayar" },
-              { id: "confirmed", label: "Terkonfirmasi" },
-              { id: "cancelled", label: "Dibatalkan" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition ${
-                  activeTab === tab.id
-                    ? "bg-emerald text-white dark:bg-sage dark:text-[#102a22]"
-                    : "text-muted hover:bg-black/5 dark:text-cream/60 dark:hover:bg-white/5"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={fetchMyBookings}
-            disabled={loading}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted hover:text-emerald dark:text-cream/60 dark:hover:text-sage"
-          >
-            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-            <span>Muat Ulang</span>
-          </button>
-        </div>
-      )}
-
-      {loading ? (
-        <div className="grid gap-3 py-10">
-          <div className="h-24 animate-pulse rounded-lg bg-emerald/5 dark:bg-white/5" />
-          <div className="h-24 animate-pulse rounded-lg bg-emerald/5 dark:bg-white/5" />
-        </div>
-      ) : displayBookings.length === 0 ? (
-        <div className="border border-line bg-paper px-5 py-14 text-center dark:border-white/10 dark:bg-[#142620] md:px-10">
-          <StateBox type="empty">Belum ada riwayat booking pada kategori ini.</StateBox>
-          <Button to="/booking" className="mt-6">
-            {t("historyPage.startBooking")}
-          </Button>
-        </div>
-      ) : (
-        <div className="grid gap-4">
-          {displayBookings.map((b) => {
-            const isPending = b.status === "PENDING_PAYMENT";
-            const isConfirmed = b.status === "CONFIRMED" || b.status === "COMPLETED";
-            const isCancelled = b.status === "CANCELLED" || b.status === "EXPIRED";
-
-            return (
-              <article
-                key={b.bookingCode}
-                className="grid gap-5 border border-line bg-paper p-5 shadow-[0_8px_24px_rgba(40,45,35,.04)] dark:border-white/10 dark:bg-[#142620] dark:text-cream md:grid-cols-[1fr_auto] md:items-center md:p-6"
-              >
-                <div>
-                  <div className="mb-3 flex flex-wrap items-center gap-2.5">
-                    {isConfirmed && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e8f0e9] px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald dark:bg-[#1b362a] dark:text-sage">
-                        <CheckCircle size={12} /> Terkonfirmasi
-                      </span>
-                    )}
-                    {isPending && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:bg-amber-400/15 dark:text-amber-300">
-                        <AlertCircle size={12} /> Menunggu Pembayaran
-                      </span>
-                    )}
-                    {isCancelled && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-red-600 dark:bg-red-400/15 dark:text-red-300">
-                        <XCircle size={12} /> {b.status === "EXPIRED" ? "Kadaluarsa" : "Dibatalkan"}
-                      </span>
-                    )}
-                    <span className="text-xs font-bold tracking-[.08em] text-[#5e655f] dark:text-cream/60">
-                      {b.bookingCode}
-                    </span>
-                  </div>
-
-                  <h2 className="text-lg font-bold tracking-tight text-ink dark:text-cream">
-                    {b.courtName || "Lapangan"}{" "}
-                    <span className="px-1 text-muted dark:text-cream/50">·</span>{" "}
-                    {localDate(b.date)}
-                  </h2>
-
-                  <p className="mt-1 text-xs text-muted dark:text-cream/70">
-                    {timeLabel(b.startHour)} – {timeLabel(b.endHour)}{" "}
-                    <span className="px-1">·</span> {b.duration} {t("historyPage.durationUnit")}
-                  </p>
-
-                  <p className="mt-3 text-sm font-bold text-emerald dark:text-champagne">
-                    Total {rupiah(b.totalAmount || totalPrice(b.duration))}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  {isPending && (
-                    <>
-                      <Button
-                        to={`/booking/pembayaran`}
-                        className="gap-1.5 text-xs"
-                      >
-                        <CreditCard size={14} /> Bayar Sekarang
-                      </Button>
-                      <button
-                        type="button"
-                        onClick={() => setCancelModal(b.bookingCode)}
-                        className="rounded-lg border border-red-500/30 px-3 py-2 text-xs font-bold text-red-600 transition hover:bg-red-500/10 dark:text-red-300"
-                      >
-                        Batalkan
-                      </button>
-                    </>
-                  )}
-
-                  <Button
-                    to={`/booking/riwayat/${encodeURIComponent(b.bookingCode)}`}
-                    variant="secondary"
-                    className="gap-2 text-xs"
+          {isAuthenticated && (
+            <div className="gbh-history-controls">
+              <div className="gbh-tabs" role="group" aria-label="Kategori riwayat booking">
+                {[
+                  { id: "all", label: "Semua" },
+                  { id: "pending", label: "Menunggu Bayar" },
+                  { id: "confirmed", label: "Terkonfirmasi" },
+                  { id: "cancelled", label: "Dibatalkan" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    aria-pressed={activeTab === tab.id}
+                    className={`gbh-tab ${activeTab === tab.id ? "is-active" : ""}`}
                   >
-                    <ReceiptText size={15} /> {t("historyPage.viewReceipt")} <ArrowUpRight size={13} />
-                  </Button>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-      )}
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
 
-      {/* CANCEL MODAL CONFIRMATION */}
-      {cancelModal && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-sm rounded-lg border border-line bg-paper p-6 text-center shadow-xl dark:border-white/15 dark:bg-[#142620]">
-            <XCircle size={32} className="mx-auto text-danger dark:text-red-300" />
-            <h3 className="mt-3 text-base font-bold text-ink dark:text-cream">Batalkan Pemesanan?</h3>
-            <p className="mt-2 text-xs text-muted dark:text-cream/70">
-              Pemesanan <span className="font-mono font-bold text-ink dark:text-cream">{cancelModal}</span> akan dibatalkan dan slot waktu akan dibuka kembali untuk pemain lain.
-            </p>
-            <div className="mt-6 flex justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setCancelModal(null)}
-                disabled={actionBusy}
-                className="rounded-lg border border-line px-4 py-2 text-xs font-semibold text-ink dark:border-white/20 dark:text-cream"
-              >
-                Kembali
+              <button type="button" onClick={fetchMyBookings} disabled={loading} className="gbh-refresh">
+                <RefreshCw size={14} className={loading ? "animate-spin" : ""} aria-hidden="true" />
+                <span>Muat Ulang</span>
               </button>
-              <button
-                type="button"
-                onClick={() => handleCancelBooking(cancelModal)}
-                disabled={actionBusy}
-                className="rounded-lg bg-danger px-4 py-2 text-xs font-bold text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {actionBusy ? "Membatalkan..." : "Ya, Batalkan"}
+            </div>
+          )}
+        </section>
+
+        {error ? (
+          <section className="gbh-empty gbh-glass" role="alert">
+            <span className="gbh-empty-icon"><AlertCircle size={23} strokeWidth={1.6} aria-hidden="true" /></span>
+            <p className="gbh-empty-message">{error}</p>
+          </section>
+        ) : loading ? (
+          <div className="gbh-loading-list" role="status" aria-label="Memuat riwayat booking">
+            <div className="gbh-skeleton" />
+            <div className="gbh-skeleton" />
+          </div>
+        ) : displayBookings.length === 0 ? (
+          <section className="gbh-empty gbh-glass" aria-live="polite">
+            <span className="gbh-empty-icon"><ReceiptText size={23} strokeWidth={1.6} aria-hidden="true" /></span>
+            <p className="gbh-empty-message">Belum ada riwayat booking pada kategori ini.</p>
+            <Link to="/booking" className="gbh-button gbh-button-primary">
+              {t("historyPage.startBooking")}<ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </section>
+        ) : (
+          <div className="gbh-record-list">
+            {displayBookings.map((b) => {
+              const isPending = b.status === "PENDING_PAYMENT";
+              const isConfirmed = b.status === "CONFIRMED" || b.status === "COMPLETED";
+              const isCancelled = b.status === "CANCELLED" || b.status === "EXPIRED";
+
+              return (
+                <Reveal key={b.bookingCode} className="gbh-record-reveal">
+                  <article className="gbh-record gbh-glass">
+                    <header className="gbh-record-header">
+                      <span className="gbh-code-label">Kode booking</span>
+                      <span className="gbh-record-code">{b.bookingCode}</span>
+                      {isConfirmed && <span className="gbh-status gbh-status-confirmed"><CheckCircle size={14} aria-hidden="true" />Terkonfirmasi</span>}
+                      {isPending && <span className="gbh-status gbh-status-pending"><AlertCircle size={14} aria-hidden="true" />Menunggu Pembayaran</span>}
+                      {isCancelled && <span className="gbh-status gbh-status-cancelled"><XCircle size={14} aria-hidden="true" />{b.status === "EXPIRED" ? "Kadaluarsa" : "Dibatalkan"}</span>}
+                      {!isConfirmed && !isPending && !isCancelled && b.status && <span className="gbh-status gbh-status-neutral">{b.status}</span>}
+                    </header>
+
+                    <div className="gbh-record-body">
+                      <div className="gbh-record-summary">
+                        <h2>{b.courtName || "Lapangan"}</h2>
+                        <div className="gbh-record-facts">
+                          <div className="gbh-record-fact">
+                            <span className="gbh-fact-icon"><CalendarDays size={16} aria-hidden="true" /></span>
+                            <span><small>{t("bookingPage.summaryDate")}</small><strong>{localDate(b.date)}</strong></span>
+                          </div>
+                          <div className="gbh-record-fact">
+                            <span className="gbh-fact-icon"><Clock3 size={16} aria-hidden="true" /></span>
+                            <span><small>{t("bookingPage.summaryTime")}</small><strong>{timeLabel(b.startHour)} – {timeLabel(b.endHour)}</strong></span>
+                          </div>
+                          <div className="gbh-record-fact">
+                            <span className="gbh-fact-icon"><History size={16} aria-hidden="true" /></span>
+                            <span><small>{t("bookingPage.summaryDuration")}</small><strong>{b.duration} {t("historyPage.durationUnit")}</strong></span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="gbh-record-total">
+                        <span>Total</span>
+                        <strong>{rupiah(b.totalAmount || totalPrice(b.duration))}</strong>
+                      </div>
+                    </div>
+
+                    <footer className="gbh-record-actions">
+                      {isPending && (
+                        <>
+                          <Link to="/booking/pembayaran" className="gbh-button gbh-button-primary">
+                            <CreditCard size={15} aria-hidden="true" />Bayar Sekarang
+                          </Link>
+                          <button type="button" onClick={() => setCancelModal(b.bookingCode)} className="gbh-button gbh-button-danger">
+                            <XCircle size={14} aria-hidden="true" />Batalkan
+                          </button>
+                        </>
+                      )}
+                      <Link to={`/booking/riwayat/${encodeURIComponent(b.bookingCode)}`} className="gbh-button gbh-button-secondary">
+                        <ReceiptText size={15} aria-hidden="true" />{t("historyPage.viewReceipt")}<ArrowUpRight size={13} aria-hidden="true" />
+                      </Link>
+                    </footer>
+                  </article>
+                </Reveal>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {cancelModal && (
+        <div className="gbh-modal-backdrop">
+          <div className="gbh-cancel-modal gbh-glass" role="dialog" aria-modal="true" aria-labelledby="gbh-cancel-title">
+            <span className="gbh-modal-icon"><XCircle size={28} aria-hidden="true" /></span>
+            <h2 id="gbh-cancel-title">Batalkan Pemesanan?</h2>
+            <p>Pemesanan <strong>{cancelModal}</strong> akan dibatalkan dan slot waktu akan dibuka kembali untuk pemain lain.</p>
+            <div className="gbh-modal-actions">
+              <button type="button" onClick={() => setCancelModal(null)} disabled={actionBusy} className="gbh-button gbh-button-secondary">Kembali</button>
+              <button type="button" onClick={() => handleCancelBooking(cancelModal)} disabled={actionBusy} className="gbh-button gbh-button-danger-solid">
+                {actionBusy ? "Membatalkan..." : <><Check size={14} aria-hidden="true" />Ya, Batalkan</>}
               </button>
             </div>
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }
