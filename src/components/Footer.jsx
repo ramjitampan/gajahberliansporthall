@@ -1,12 +1,15 @@
 import { ArrowUpRight, MapPin, Phone } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "../i18n/I18nContext";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const pathname = useLocation().pathname;
+  const showVenueDetails = pathname === "/" || pathname === "/tentang" || pathname === "/daftar-harga" || pathname === "/fasilitas" || pathname === "/lokasi" || pathname === "/booking/riwayat";
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent("Hall badminton gajah berlian, Jl. Mela Utama No.1, Padang")}`;
 
   return (
-    <footer className="bg-[#123d32] text-[#f7f3ea] dark:bg-[#0a1713] dark:text-cream border-t border-white/5 transition-colors duration-200">
+    <footer className={`gb-footer ${showVenueDetails ? "gb-home-footer" : ""} bg-[#123d32] text-[#f7f3ea] dark:bg-[#0a1713] dark:text-cream border-t border-white/5 transition-colors duration-200`}>
       <div className="mx-auto grid w-[min(1240px,calc(100%-40px))] gap-10 py-14 md:grid-cols-[1.2fr_.7fr_1fr] md:py-16">
         <div>
           <Link to="/" className="font-extrabold tracking-tight text-lg text-cream">
@@ -30,6 +33,18 @@ export default function Footer() {
             <Link to="/booking/riwayat" className="hover:text-cream transition">{t("nav.history")}</Link>
           </div>
         </div>
+
+        {showVenueDetails && (
+          <div className="gb-footer-location">
+            <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[.18em] text-[#c8ae78] dark:text-champagne">{t("map.eyebrow")}</h2>
+            <p>{t("map.addressValue")}</p>
+            <p>{t("map.hoursLabel")}: {t("map.hoursValue")}</p>
+            <div className="gb-footer-location-links">
+              <Link to="/lokasi">{t("nav.location")}</Link>
+              <a href={directionsUrl} target="_blank" rel="noopener noreferrer">{t("map.openInGoogleMaps")}</a>
+            </div>
+          </div>
+        )}
 
         <div>
           <h2 className="mb-4 text-[10px] font-bold uppercase tracking-[.18em] text-[#c8ae78] dark:text-champagne">

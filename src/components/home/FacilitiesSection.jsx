@@ -1,151 +1,72 @@
-import { ArrowUpRight, CircleDot, Dumbbell, LampDesk } from "lucide-react";
+import { Armchair, ArrowUpRight, CircleDot, LampDesk, ParkingCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 import Reveal from "../Reveal";
+import courtImage from "../../assets/Lapangan.jpeg";
+import parkingImage from "../../assets/Lapangan Parkir.png";
+import lightingImage from "../../assets/Pencahayaan.png";
+import waitingImage from "../../assets/Ruang Tunggu.png";
 import { facilities } from "../../data/facilities";
-import courtImage from "../../assets/LapanganContoh.png";
-import waitingImage from "../../assets/RuangTnggu.png";
-import lightingImage from "../../assets/PencahayaanContoh.png";
 import { useTranslation } from "../../i18n/I18nContext";
 
-const icons = [CircleDot, Dumbbell, LampDesk];
-const facilityImages = [courtImage, waitingImage, lightingImage];
-const positions = ["center 42%", "65% 35%", "30% 65%"];
+const facilityVisuals = {
+  court: { image: courtImage, Icon: CircleDot, position: "center 54%" },
+  waiting: { image: waitingImage, Icon: Armchair, position: "center 54%" },
+  lighting: { image: lightingImage, Icon: LampDesk, position: "center 30%" },
+  parking: { image: parkingImage, Icon: ParkingCircle, position: "center 55%" },
+};
 
-function FacilityCard({ item, index, Icon, image, imagePosition, featured = false, exploreText }) {
-  return (
-    <article
-      className={`
-        group relative isolate h-full overflow-hidden
-        rounded-xl bg-[#10251d]
-        ${featured ? "min-h-[430px]" : "min-h-[245px]"}
-      `}
-    >
-      <img
-        src={image}
-        alt=""
-        aria-hidden="true"
-        style={{ objectPosition: imagePosition }}
-        onError={(event) => {
-          event.currentTarget.style.display = "none";
-        }}
-        className="
-          absolute inset-0 h-full w-full
-          object-cover opacity-75
-          transition-all duration-700 ease-out
-          group-hover:scale-[1.06]
-          group-hover:opacity-90
-          motion-reduce:transform-none
-        "
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#071b14]/95 via-[#071b14]/40 to-[#071b14]/10" />
-      <div className="absolute inset-0 bg-champagne/0 transition-colors duration-500 group-hover:bg-champagne/[0.04]" />
-
-      <div className="absolute inset-x-0 top-0 flex items-start justify-between p-6">
-        <div className="flex size-10 items-center justify-center rounded-full border border-white/25 bg-black/15 text-champagne backdrop-blur-sm">
-          <Icon size={18} strokeWidth={1.5} />
-        </div>
-        <span className="font-display text-2xl italic text-white/60">0{index + 1}</span>
-      </div>
-
-      <div className={`absolute inset-x-0 bottom-0 ${featured ? "p-7 md:p-9" : "p-6"}`}>
-        <div className="mb-4 h-px w-8 bg-champagne/80 transition-all duration-500 group-hover:w-14" />
-        <h3 className={`font-semibold tracking-[-0.025em] text-white ${featured ? "text-2xl md:text-[32px]" : "text-xl"}`}>
-          {item.title}
-        </h3>
-        <p className={`mt-3 max-w-md leading-relaxed text-white/70 ${featured ? "text-sm" : "text-xs"}`}>
-          {item.description}
-        </p>
-        {featured && (
-          <div className="mt-6 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.15em] text-champagne">
-            {exploreText || "Jelajahi fasilitas"}
-            <ArrowUpRight size={14} />
-          </div>
-        )}
-      </div>
-    </article>
-  );
+function moveSpotlight(event) {
+  if (event.pointerType === "touch") return;
+  const bounds = event.currentTarget.getBoundingClientRect();
+  event.currentTarget.style.setProperty("--gb-pointer-x", `${event.clientX - bounds.left}px`);
+  event.currentTarget.style.setProperty("--gb-pointer-y", `${event.clientY - bounds.top}px`);
 }
 
 export default function FacilitiesSection() {
   const { t } = useTranslation();
-  const featuredFacility = facilities[0];
-  const secondaryFacilities = facilities.slice(1, 3);
+  const visibleFacilities = facilities.slice(0, 4);
 
   return (
-    <section
-      id="facilities"
-      className="bg-[#182f27] px-5 py-20 text-ivory dark:bg-[#0f1f1a] md:px-8 lg:py-28 transition-colors duration-200"
-    >
-      <div className="mx-auto w-full max-w-[1200px]">
-        <Reveal className="mb-12 flex flex-col justify-between gap-7 md:flex-row md:items-end">
-          <div className="max-w-[650px]">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="h-px w-8 bg-champagne" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-sage">
-                {t("homeFacilities.eyebrow")}
-              </span>
-            </div>
-            <h2 className="text-4xl font-semibold leading-[1.08] tracking-[-0.045em] md:text-5xl lg:text-[58px]">
-              {t("homeFacilities.titleLead")}
-              <br />
-              <span className="font-display font-normal italic text-champagne">
-                {t("homeFacilities.titleAccent")}
-              </span>
-            </h2>
-          </div>
-          <p className="max-w-[290px] text-sm leading-7 text-ivory/55">
-            {t("homeFacilities.copy")}
-          </p>
-        </Reveal>
+    <section id="facilities" className="gb-section gb-facilities">
+      <Reveal className="gb-facilities-head">
+        <div>
+          <p className="gb-kicker">{t("homeFacilities.eyebrow")}</p>
+          <h2>
+            {t("homeFacilities.titleLead")} <span>{t("homeFacilities.titleAccent")}</span>
+          </h2>
+        </div>
+        <p>{t("homeFacilities.copy")}</p>
+      </Reveal>
 
-        <div className="grid gap-4 md:h-[510px] md:grid-cols-[1.2fr_0.8fr]">
-          {featuredFacility && (
-            <Reveal className="h-full">
-              <FacilityCard
-                item={featuredFacility}
-                index={0}
-                Icon={icons[0]}
-                image={facilityImages[0]}
-                imagePosition={positions[0]}
-                featured
-                exploreText={t("homeFacilities.explore")}
-              />
+      <div className="gb-facility-grid">
+        {visibleFacilities.map((facility, index) => {
+          const { image, Icon, position } = facilityVisuals[facility.id] || facilityVisuals.court;
+          return (
+            <Reveal key={facility.id} className="gb-facility-item">
+              <article className="gb-facility-card gb-glass gb-glass-interactive" onPointerMove={moveSpotlight}>
+                <div className="gb-facility-image">
+                  <img src={image} alt={facility.title} loading="lazy" style={{ objectPosition: position }} />
+                </div>
+                <div className="gb-facility-card-content">
+                  <div className="gb-facility-card-top">
+                    <span className="gb-facility-icon"><Icon size={21} strokeWidth={1.65} /></span>
+                    <span className="gb-facility-number">0{index + 1}</span>
+                  </div>
+                  <div className="gb-facility-card-copy">
+                    <span className="gb-facility-label">{facility.category}</span>
+                    <h3>{facility.title}</h3>
+                    <p>{facility.description}</p>
+                  </div>
+                </div>
+              </article>
             </Reveal>
-          )}
+          );
+        })}
+      </div>
 
-          <div className="grid gap-4 md:min-h-0 md:grid-rows-2">
-            {secondaryFacilities.map((item, index) => {
-              const actualIndex = index + 1;
-              const Icon = icons[actualIndex];
-              return (
-                <Reveal key={item.id} delay={actualIndex * 80} className="h-full md:min-h-0">
-                  <FacilityCard
-                    item={item}
-                    index={actualIndex}
-                    Icon={Icon}
-                    image={facilityImages[actualIndex]}
-                    imagePosition={positions[actualIndex]}
-                  />
-                </Reveal>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="mt-9 flex flex-wrap items-center justify-between gap-5 border-t border-white/10 pt-6">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-ivory/35">
-            Gajah Berlian Sports Hall
-          </span>
-          <Link
-            to="/fasilitas"
-            className="group inline-flex items-center gap-3 text-xs font-semibold text-champagne transition-colors duration-300 hover:text-ivory"
-          >
-            {t("homeFacilities.explore")}
-            <span className="flex size-8 items-center justify-center rounded-full border border-champagne/35 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:border-ivory">
-              <ArrowUpRight size={15} />
-            </span>
-          </Link>
-        </div>
+      <div className="gb-facilities-foot">
+        <span>Gajah Berlian Sports Hall</span>
+        <Link to="/fasilitas" className="gb-link">{t("homeFacilities.explore")}<ArrowUpRight size={14} /></Link>
       </div>
     </section>
   );

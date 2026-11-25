@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const location = useLocation();
+  const isApprovedPage = location.pathname === "/" || location.pathname === "/tentang" || location.pathname === "/daftar-harga" || location.pathname === "/fasilitas" || location.pathname === "/lokasi" || location.pathname === "/booking/riwayat";
   const navigate = useNavigate();
   const { theme, toggleTheme, isDark } = useTheme();
   const { lang, toggleLang, t } = useTranslation();
@@ -69,16 +70,20 @@ export default function Navbar() {
 
   return (
     <motion.header
-      className={`fixed inset-x-0 top-0 z-50 border-b text-cream transition-[background-color,backdrop-filter,box-shadow] duration-300 ease-out ${
+      className={`gb-navbar ${isApprovedPage ? "gb-home-navbar" : ""} ${scrolled ? "gb-nav-scrolled" : ""} fixed inset-x-0 top-0 z-50 border-b text-cream transition-[background-color,backdrop-filter,box-shadow] duration-300 ease-out ${
         glassOnScroll
           ? "border-white/20 bg-[#102a22]/85 shadow-[0_5px_22px_rgba(10,24,19,.18)] backdrop-blur-xl dark:bg-[#091914]/90 dark:border-white/10"
           : "border-white/10 bg-[#102a22] shadow-[0_5px_22px_rgba(10,24,19,.18)] dark:bg-[#0b1c17]"
       }`}
       animate={{
         backgroundColor: glassOnScroll
-          ? isDark
+          ? isApprovedPage
+            ? isDark ? "rgba(11,19,36,0.84)" : "rgba(245,239,227,0.84)"
+            : isDark
             ? "rgba(9,25,20,0.88)"
             : "rgba(16,42,34,0.85)"
+          : isApprovedPage
+          ? isDark ? `rgba(11,19,36,${open ? 0.94 : 0.62})` : `rgba(245,239,227,${open ? 0.94 : 0.62})`
           : isDark
           ? "rgba(11,28,23,1)"
           : "rgba(16,42,34,1)",
